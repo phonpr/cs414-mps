@@ -9,12 +9,8 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.gstreamer.Caps;
-import org.gstreamer.Element;
-import org.gstreamer.ElementFactory;
 import org.gstreamer.Gst;
 import org.gstreamer.Pipeline;
-import org.gstreamer.State;
 import org.gstreamer.swing.VideoComponent;
 
 public class Mp1 extends JPanel {
@@ -29,8 +25,6 @@ public class Mp1 extends JPanel {
 	public static final int FRAME_HEIGHT = 680;
 	
 	// UI static components
-	private static ActionListener listener = null;
-	
 	private static JFrame frameMain = null;
 	
 	private static JPanel panelMain = null;
@@ -41,12 +35,15 @@ public class Mp1 extends JPanel {
 	private static JButton btnPlay = null;
 	private static JButton btnFastForward = null;
 	
-	// GStreamer static components
-	private static Pipeline pipe = null;
+	private static VideoComponent videoComponent = null;
 	
-	private static void initializeUi() {
-		listener = new Listener();
-		
+	// GStreamer static components
+	private static Pipeline pipeline = null;
+	
+	// Action listener
+	private static ActionListener listener = null;
+	
+	private static void initialize() {
 		panelMain = new JPanel();
 		panelMenu = new JPanel();
 		panelVideo = new JPanel();
@@ -54,6 +51,10 @@ public class Mp1 extends JPanel {
 		btnRecord = new JButton("Record");
 		btnPlay = new JButton("Play");
 		btnFastForward = new JButton("FF");
+		
+		videoComponent = new VideoComponent();
+		pipeline = new Pipeline("Video");
+		listener = new Listener(pipeline, videoComponent);
 		
 		panelMain.add(panelMenu);
 		panelMain.add(panelVideo);
@@ -69,23 +70,9 @@ public class Mp1 extends JPanel {
 		btnFastForward.setActionCommand(Listener.ACTION_FF);
 		btnFastForward.addActionListener(listener);
 		panelMenu.add(btnFastForward);
-	}
-
-	private static void initializeVideo() {
-		pipe = new Pipeline("VideoTest");
 		
-		final Element videoSrc = ElementFactory.make("videotestsrc", "source");
-		final Element videoFilter = ElementFactory.make("capsfilter", "filter");
-		
-		videoFilter.setCaps(Caps.fromString("video/x-raw-yuv, width=720, height=576, bpp=32, depth=32, framerate=25/1"));
-		VideoComponent videoComponent = new VideoComponent();
-		Element videoSink = videoComponent.getElement();
-		
-		pipe.addMany(videoSrc, videoFilter, videoSink);
-		Element.linkMany(videoSrc, videoFilter, videoSink);
-		
-		panelVideo.add(videoComponent, BorderLayout.CENTER);
 		videoComponent.setPreferredSize(new Dimension(720, 576));
+		panelVideo.add(videoComponent, BorderLayout.CENTER);
 	}
 
 	private static void createAndShowGUI() {
@@ -112,11 +99,9 @@ public class Mp1 extends JPanel {
 	public static void main(String[] args) {
 		args = Gst.init("VideoTest", args);
 		
-		initializeUi();
-		initializeVideo();
-		
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
+				initialize();
 				createAndShowGUI();
 			}
 		});

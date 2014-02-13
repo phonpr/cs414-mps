@@ -14,13 +14,13 @@ public class Listener implements ActionListener {
 		String action = event.getActionCommand();
 		
 		if (action == ACTION_RECORD) {
-			System.out.println(ACTION_RECORD);
+			System.out.println("Record button pressed");
 		}
 		else if (action == ACTION_PLAY) {
-			System.out.println(ACTION_PLAY);
+			System.out.println("Play button pressed");
 		}
 		else if (action == ACTION_FF) {
-			System.out.println(ACTION_FF);
+			System.out.println("FF button pressed");
 		}
 	}
 

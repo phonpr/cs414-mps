@@ -15,9 +15,8 @@ public class RecordController extends Controller {
 	
 	private class RecordThread implements Runnable {
 		@Override
-		public void run() {			
-			// for linux, use v4l2src for the source instead
-			final Element videosrc = ElementFactory.make("videotestsrc", "source");
+		public void run() {
+			final Element videosrc = ElementFactory.make(WINDOWS_WEBCAM_SRC, "source");
 			final Element tee = ElementFactory.make("tee", "tee0");
 			
 			final Element colorspace = ElementFactory.make("ffmpegcolorspace", "colorspace");

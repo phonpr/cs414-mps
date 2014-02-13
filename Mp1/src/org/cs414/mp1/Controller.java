@@ -6,7 +6,10 @@ import org.gstreamer.swing.VideoComponent;
 
 public class Controller {
 	public static final String DEFAULT_CAPS_FILTER
-		= "video/x-raw-yuv, width=720, height=576, framerate=10/1";
+		= "video/x-raw-yuv, width=640, height=480, framerate=10/1";
+	
+	public static final String WINDOWS_WEBCAM_SRC = "ksvideosrc";
+	public static final String LINUX_WBCAM_SRC = "v4l2src";
 
 	private Pipeline pipeline = null;
 	private VideoComponent videoComponent = null;

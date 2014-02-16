@@ -10,6 +10,7 @@ public class Controller {
 	
 	public static final String WINDOWS_WEBCAM_SRC = "ksvideosrc";
 	public static final String LINUX_WBCAM_SRC = "v4l2src";
+	public static final String VIDEO_TEST_SRC = "videotestsrc";
 
 	private Pipeline pipeline = null;
 	private VideoComponent videoComponent = null;

@@ -1,5 +1,120 @@
 package org.cs414.mp1;
 
+import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+public class Mp1 {
+
+	private JFrame frmVRemote;
+	private JTextField textFilePath;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Mp1 window = new Mp1();
+					window.frmVRemote.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the application.
+	 */
+	public Mp1() {
+		initialize();
+	}
+
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	private void initialize() {
+		frmVRemote = new JFrame();
+		frmVRemote.setTitle("V-Remote");
+		frmVRemote.setBounds(100, 100, 394, 149);
+		frmVRemote.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmVRemote.getContentPane().setLayout(new BoxLayout(frmVRemote.getContentPane(), BoxLayout.Y_AXIS));
+		
+		JPanel panelPlayRecord = new JPanel();
+		frmVRemote.getContentPane().add(panelPlayRecord);
+		
+		JButton btnPlay = new JButton("Play");
+		panelPlayRecord.add(btnPlay);
+		
+		JButton btnRecord = new JButton("Record");
+		panelPlayRecord.add(btnRecord);
+		
+		JPanel panelControl = new JPanel();
+		FlowLayout fl_panelControl = (FlowLayout) panelControl.getLayout();
+		frmVRemote.getContentPane().add(panelControl);
+		
+		JButton btnStop = new JButton("Stop");
+		panelControl.add(btnStop);
+		
+		JButton btnPause = new JButton("Pause");
+		panelControl.add(btnPause);
+		
+		JButton btnFF = new JButton("FF");
+		panelControl.add(btnFF);
+		
+		JButton btnRW = new JButton("RW");
+		panelControl.add(btnRW);
+		
+		JPanel panelFile = new JPanel();
+		frmVRemote.getContentPane().add(panelFile);
+		
+		JLabel labelFile = new JLabel("File");
+		panelFile.add(labelFile);
+		
+		textFilePath = new JTextField();
+		panelFile.add(textFilePath);
+		textFilePath.setColumns(28);
+		btnRW.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnFF.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnPause.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnStop.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnRecord.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnPlay.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+	}
+
+}
+
+
+/*package org.cs414.mp1;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -15,9 +130,9 @@ import org.gstreamer.swing.VideoComponent;
 
 public class Mp1 extends JPanel {
 	
-	/**
+	*//**
 	 * generated serial version UID
-	 */
+	 *//*
 	private static final long serialVersionUID = -2398906894228626286L;
 	
 	// constants
@@ -108,3 +223,4 @@ public class Mp1 extends JPanel {
 	}
 
 }
+*/

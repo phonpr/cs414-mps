@@ -26,6 +26,8 @@ public class Controller {
 	public static final String WINDOWS_WEBCAM_SRC = "ksvideosrc";
 	public static final String LINUX_WBCAM_SRC = "v4l2src";
 	public static final String VIDEO_TEST_SRC = "videotestsrc";
+	public static final String LINUX_AUDIO_SRC = "pulsesrc";
+	public static final String AUDIO_TEST_SRC = "audiotestsrc";
 	
 	public static int VIDEO_DEFAULT_WIDTH = 640;
 	public static int VIDEO_DEFAULT_HEIGHT = 480;

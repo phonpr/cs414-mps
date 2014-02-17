@@ -60,7 +60,7 @@ public class DialogRecordOptions extends JDialog {
 	}
 	
 	public int getVideoHeight() {
-		return Integer.parseInt(textWidth.getText());
+		return Integer.parseInt(textHeight.getText());
 	}
 	
 	public int getFrameRate() {

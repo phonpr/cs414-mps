@@ -32,12 +32,16 @@ public class FrameVideo extends JFrame {
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		add(videoComponent, BorderLayout.CENTER);
 		
+		updateSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+ 		videoComponent.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+	}
+	
+	public void updateSize(int width, int height) {
 		// position and size
  		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
- 		int frameX = (screen.width - DEFAULT_WIDTH)/2;
- 		int frameY = (screen.height - DEFAULT_HEIGHT)/2;
- 		setBounds(frameX, frameY, DEFAULT_WIDTH, DEFAULT_HEIGHT);
- 		videoComponent.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+ 		int frameX = (screen.width - width)/2;
+ 		int frameY = (screen.height - height)/2;
+ 		setBounds(frameX, frameY, width, height);
 	}
 	
 	public VideoComponent getVideoComponent() {

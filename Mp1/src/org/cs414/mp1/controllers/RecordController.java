@@ -28,17 +28,6 @@ public class RecordController extends Controller {
 	private int framerate;
 	private VideoType eVideoType;
 	private AudioType eAudioType;
-
-
-	public RecordController(File file) {
-		super(file);
-		
-		this.width = VIDEO_DEFAULT_WIDTH;
-		this.height = VIDEO_DEFAULT_HEIGHT;
-		framerate = VIDEO_DEFAULT_RATE;
-		eVideoType = VideoType.MJPEG;
-		eAudioType = AudioType.OGG;
-	}
 	
 	/**
 	 * @param file
@@ -62,6 +51,8 @@ public class RecordController extends Controller {
 		final FrameVideo frameVideo = getFrameVideo();
 		final VideoComponent videoComponent = frameVideo.getVideoComponent();
 		
+		frameVideo.updateSize(width, height);
+		
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -74,8 +65,8 @@ public class RecordController extends Controller {
 		        audioPipe = new Pipeline("AudioTest");
 		        */
 				
-		        final Element videoSrc = ElementFactory.make(VIDEO_TEST_SRC, "source");
-		        final Element audioSrc = ElementFactory.make("pulsesrc", "soundsrc");
+		        final Element videoSrc = ElementFactory.make(WINDOWS_WEBCAM_SRC, "source");
+		        final Element audioSrc = ElementFactory.make(AUDIO_TEST_SRC, "soundsrc");
 		        audioSrc.set("device", "alsa_input.pci-0000_00_1b.0.analog-stereo");
 		        
 		        final Element videoTee = ElementFactory.make("tee", "videoTee");

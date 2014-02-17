@@ -157,6 +157,17 @@ public class FrameVRemote extends JFrame {
 		btnFF.setForeground(null);
 		btnRW.setForeground(null);
 	}
+	
+	public void togglePause() {
+		if (btnPause.getForeground() == Color.RED) {
+			btnPause.setForeground(null);
+		}
+		else {
+			btnPause.setForeground(Color.RED);
+			btnFF.setForeground(null);
+			btnRW.setForeground(null);
+		}
+	}
 
 	public void toggleFF() {
 		if (btnFF.getForeground() == Color.RED) {
@@ -164,6 +175,7 @@ public class FrameVRemote extends JFrame {
 		}
 		else {
 			btnFF.setForeground(Color.RED);
+			btnPause.setForeground(null);
 			btnRW.setForeground(null);
 		}
 	}
@@ -174,6 +186,7 @@ public class FrameVRemote extends JFrame {
 		}
 		else {
 			btnRW.setForeground(Color.RED);
+			btnPause.setForeground(null);
 			btnFF.setForeground(null);
 		}
 	}

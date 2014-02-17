@@ -65,20 +65,25 @@ public class RemoteListener implements ActionListener {
 			frameRemote.resetComponents();
 		}
 		else if (action == ACTION_PAUSE) {
+			// this is activated only when controller is PlayController
 			if (controller != null) {
-				controller.pauseRunning();
-				controller = null;
+				((PlayController) controller).togglePause();
+				frameRemote.togglePause();
 			}
 		}
 		else if (action == ACTION_FF) {
 			// this is activated only when controller is PlayController
-			((PlayController) controller).toggleFastForward();
-			frameRemote.toggleFF();
+			if (controller != null) {
+				((PlayController) controller).toggleFF();
+				frameRemote.toggleFF();
+			}
 		}
 		else if (action == ACTION_RW) {
 			// this is activated only when controller is PlayController
-			((PlayController) controller).toggleRewind();
-			frameRemote.toggleRW();
+			if (controller != null) {
+				((PlayController) controller).toggleRW();
+				frameRemote.toggleRW();
+			}
 		}
 		else ;
 	}

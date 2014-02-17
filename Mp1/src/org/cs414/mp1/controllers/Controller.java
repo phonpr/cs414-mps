@@ -47,10 +47,6 @@ public class Controller {
 		setState(State.PLAYING);
 	}
 	
-	public void pauseRunning() {
-		setState(State.PAUSED);
-	}
-	
 	public void stopRunning() {
 		setState(State.NULL);
 		frameVideo.dispose();

@@ -58,7 +58,7 @@ public class RecordController extends Controller {
 		super.stopRunning();
 	}
 	
-	public void pauseRunning() {
+	public void togglePause() {
 		//super.pauseRunning();
 	}
 }

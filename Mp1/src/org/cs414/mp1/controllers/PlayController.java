@@ -53,7 +53,20 @@ public class PlayController extends Controller
 		});
 	}
 	
-	public void toggleFastForward()
+	public void togglePause() {
+		if (getPipeline().getState() == State.PAUSED) {
+			// when resuming pased, set to normal playing
+			ePlayType = PlayType.NORMAL;
+			setState(State.PLAYING);
+			SeekEvent seekEvent = new SeekEvent(1.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
+			getPipeline().sendEvent(seekEvent);
+		}
+		else {
+			setState(State.PAUSED);
+		}
+	}
+	
+	public void toggleFF()
 	{
 		SeekEvent seekEvent = null;
 		if (ePlayType == PlayType.FF) {
@@ -69,7 +82,7 @@ public class PlayController extends Controller
 		getPipeline().sendEvent(seekEvent);
 	}
 
-	public void toggleRewind() {
+	public void toggleRW() {
 		SeekEvent seekEvent = null;
 		if (ePlayType == PlayType.RW) {
 			ePlayType = PlayType.NORMAL;

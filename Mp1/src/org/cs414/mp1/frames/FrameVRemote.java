@@ -72,15 +72,15 @@ public class FrameVRemote extends JFrame {
 		// PlayRecord Panel
 		btnPlay = new JButton(BUTTON_PLAY);
 		btnRecord = new JButton(BUTTON_RECORD);
+		btnStop = new JButton(BUTTON_STOP);
 		panelPlayRecord.add(btnPlay);
 		panelPlayRecord.add(btnRecord);
+		panelPlayRecord.add(btnStop);
 		
 		// Control Panel
-		btnStop = new JButton(BUTTON_STOP);
 		btnPause = new JButton(BUTTON_PAUSE);
 		btnFF = new JButton(BUTTON_FF);
 		btnRW = new JButton(BUTTON_RW);
-		panelControl.add(btnStop);
 		panelControl.add(btnPause);
 		panelControl.add(btnFF);
 		panelControl.add(btnRW);
@@ -105,10 +105,10 @@ public class FrameVRemote extends JFrame {
 		btnPlay.setActionCommand(RemoteListener.ACTION_PLAY);
 		btnRecord.addActionListener(listener);
 		btnRecord.setActionCommand(RemoteListener.ACTION_RECORD);
-		
-		// ControlPanel listener
 		btnStop.addActionListener(listener);
 		btnStop.setActionCommand(RemoteListener.ACTION_STOP);
+		
+		// ControlPanel listener
 		btnPause.addActionListener(listener);
 		btnPause.setActionCommand(RemoteListener.ACTION_PAUSE);
 		btnFF.addActionListener(listener);
@@ -124,10 +124,10 @@ public class FrameVRemote extends JFrame {
 	
 	public void enableCommonControllers(boolean enable) {
 		btnStop.setEnabled(enable);
-		btnPause.setEnabled(enable);
 	}
 	
 	public void enablePlayControllers(boolean enable) {
+		btnPause.setEnabled(enable);
 		btnFF.setEnabled(enable);
 		btnRW.setEnabled(enable);
 	}
@@ -157,6 +157,17 @@ public class FrameVRemote extends JFrame {
 		btnFF.setForeground(null);
 		btnRW.setForeground(null);
 	}
+	
+	public void togglePause() {
+		if (btnPause.getForeground() == Color.RED) {
+			btnPause.setForeground(null);
+		}
+		else {
+			btnPause.setForeground(Color.RED);
+			btnFF.setForeground(null);
+			btnRW.setForeground(null);
+		}
+	}
 
 	public void toggleFF() {
 		if (btnFF.getForeground() == Color.RED) {
@@ -164,6 +175,7 @@ public class FrameVRemote extends JFrame {
 		}
 		else {
 			btnFF.setForeground(Color.RED);
+			btnPause.setForeground(null);
 			btnRW.setForeground(null);
 		}
 	}
@@ -174,6 +186,7 @@ public class FrameVRemote extends JFrame {
 		}
 		else {
 			btnRW.setForeground(Color.RED);
+			btnPause.setForeground(null);
 			btnFF.setForeground(null);
 		}
 	}

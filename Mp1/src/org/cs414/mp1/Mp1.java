@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 import javax.swing.SwingUtilities;
 
 import org.cs414.mp1.controllers.Listener;
-import org.cs414.mp1.frames.FrameVRemote;
+import org.cs414.mp1.views.FrameVRemote;
 import org.gstreamer.Gst;
 
 public class Mp1 {

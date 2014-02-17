@@ -1,6 +1,6 @@
 package org.cs414.mp1.controllers;
 
-import org.cs414.mp1.frames.FrameVideo;
+import org.cs414.mp1.views.FrameVideo;
 import org.gstreamer.*;
 import org.gstreamer.elements.FileSrc;
 import org.gstreamer.event.SeekEvent;

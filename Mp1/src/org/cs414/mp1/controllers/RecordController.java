@@ -4,7 +4,7 @@ import java.io.File;
 
 import javax.swing.SwingUtilities;
 
-import org.cs414.mp1.frames.FrameVideo;
+import org.cs414.mp1.views.FrameVideo;
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;

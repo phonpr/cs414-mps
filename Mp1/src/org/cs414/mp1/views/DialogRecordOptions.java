@@ -1,4 +1,4 @@
-package org.cs414.mp1.frames;
+package org.cs414.mp1.views;
 
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -12,7 +12,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 import org.cs414.mp1.controllers.Controller;
 import org.cs414.mp1.controllers.Controller.AudioType;

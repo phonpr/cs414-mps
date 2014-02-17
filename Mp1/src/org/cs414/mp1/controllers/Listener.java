@@ -8,8 +8,8 @@ import javax.swing.JFileChooser;
 
 import org.cs414.mp1.controllers.Controller.AudioType;
 import org.cs414.mp1.controllers.Controller.VideoType;
-import org.cs414.mp1.frames.DialogRecordOptions;
-import org.cs414.mp1.frames.FrameVRemote;
+import org.cs414.mp1.views.DialogRecordOptions;
+import org.cs414.mp1.views.FrameVRemote;
 
 public class Listener implements ActionListener {
 	

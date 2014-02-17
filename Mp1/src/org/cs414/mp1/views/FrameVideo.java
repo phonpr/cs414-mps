@@ -1,4 +1,4 @@
-package org.cs414.mp1.frames;
+package org.cs414.mp1.views;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

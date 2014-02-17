@@ -12,20 +12,17 @@ import javax.swing.SwingUtilities;
 
 public class PlayController extends Controller
 {
+	
+	private enum PlayType {
+		NORMAL	,
+		FF		,
+		RW		,
+	}
+	
+	private PlayType ePlayType = PlayType.NORMAL;
+	
 	public PlayController(File file) {
 		super(file);
-	}
-
-	public void startPlaying()
-	{
-		SeekEvent normalSpeed = new SeekEvent(1.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
-		getPipeline().sendEvent(normalSpeed);
-	}
-
-	public void startFastForward()
-	{
-		SeekEvent fastForward = new SeekEvent(2.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
-		getPipeline().sendEvent(fastForward);
 	}
 
 	public void startRunning() {
@@ -55,9 +52,36 @@ public class PlayController extends Controller
 			}
 		});
 	}
+	
+	public void toggleFastForward()
+	{
+		SeekEvent seekEvent = null;
+		if (ePlayType == PlayType.FF) {
+			ePlayType = PlayType.NORMAL;
+			seekEvent = new SeekEvent(1.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
+		}
+		else {
+			// case NORMAL or RW
+			ePlayType = PlayType.FF;
+			seekEvent = new SeekEvent(2.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
+		}
+		
+		getPipeline().sendEvent(seekEvent);
+	}
 
-	public void stopRunning() {
-		super.stopRunning();
+	public void toggleRewind() {
+		SeekEvent seekEvent = null;
+		if (ePlayType == PlayType.RW) {
+			ePlayType = PlayType.NORMAL;
+			seekEvent = new SeekEvent(1.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
+		}
+		else {
+			// case NORMAL or FF
+			ePlayType = PlayType.RW;
+			//seekEvent = new SeekEvent(2.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
+		}
+		
+		getPipeline().sendEvent(seekEvent);
 	}
 
 }

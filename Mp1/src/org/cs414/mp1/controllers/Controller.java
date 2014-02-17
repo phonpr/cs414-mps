@@ -43,7 +43,6 @@ public class Controller {
 		pipeline.setState(state);
 	}
 	
-	/*
 	public void startRunning() {
 		setState(State.PLAYING);
 	}
@@ -51,7 +50,7 @@ public class Controller {
 	public void pauseRunning() {
 		setState(State.PAUSED);
 	}
-	*/
+	
 	public void stopRunning() {
 		setState(State.NULL);
 		frameVideo.dispose();

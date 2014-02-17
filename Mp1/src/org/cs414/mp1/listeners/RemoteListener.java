@@ -6,6 +6,7 @@ import java.io.File;
 
 import javax.swing.JFileChooser;
 
+import org.cs414.mp1.controllers.Controller;
 import org.cs414.mp1.controllers.PlayController;
 import org.cs414.mp1.controllers.RecordController;
 import org.cs414.mp1.frames.FrameVRemote;
@@ -23,9 +24,8 @@ public class RemoteListener implements ActionListener {
 	// frames
 	private FrameVRemote frameRemote = null;
 	
-	// controllers
-	private PlayController playController = null;
-	private RecordController recordController = null;
+	// controller
+	private Controller controller = null;
 	
 	public RemoteListener(FrameVRemote frameRemote) {
 		this.frameRemote = frameRemote;
@@ -42,8 +42,8 @@ public class RemoteListener implements ActionListener {
 				File file = fileChooser.getSelectedFile();
 				
 				frameRemote.setPlaying(file.getPath());
-				playController = new PlayController(file);
-				playController.startRunning();
+				controller = new PlayController(file);
+				controller.startRunning();
 			}
 		}
 		else if (action == ACTION_RECORD) {
@@ -53,27 +53,32 @@ public class RemoteListener implements ActionListener {
 				File file = fileChooser.getSelectedFile();
 				
 				frameRemote.setRecording(file.getPath());
-				recordController = new RecordController(file);
-				recordController.startRunning();
+				controller = new RecordController(file);
+				controller.startRunning();
 			}
 		}
 		else if (action == ACTION_STOP) {
-			if (playController != null) {
-				playController.stopRunning();
-				playController = null;
+			if (controller != null) {
+				controller.stopRunning();
+				controller = null;
 			}
-			else if (recordController != null) {
-				recordController.stopRunning();
-				recordController = null;
-			}
-			else ;
 			frameRemote.resetComponents();
 		}
 		else if (action == ACTION_PAUSE) {
+			if (controller != null) {
+				controller.pauseRunning();
+				controller = null;
+			}
 		}
 		else if (action == ACTION_FF) {
+			// this is activated only when controller is PlayController
+			((PlayController) controller).toggleFastForward();
+			frameRemote.toggleFF();
 		}
 		else if (action == ACTION_RW) {
+			// this is activated only when controller is PlayController
+			((PlayController) controller).toggleRewind();
+			frameRemote.toggleRW();
 		}
 		else ;
 	}

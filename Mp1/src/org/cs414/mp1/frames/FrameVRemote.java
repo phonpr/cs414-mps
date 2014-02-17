@@ -1,5 +1,6 @@
 package org.cs414.mp1.frames;
 
+import java.awt.Color;
 import java.awt.event.ActionListener;
 
 import javax.swing.BoxLayout;
@@ -149,5 +150,31 @@ public class FrameVRemote extends JFrame {
 		enableCommonControllers(false);
 		enablePlayControllers(false);
 		textFilePath.setText(null);
+		resetFFRW();
+	}
+	
+	public void resetFFRW() {
+		btnFF.setForeground(null);
+		btnRW.setForeground(null);
+	}
+
+	public void toggleFF() {
+		if (btnFF.getForeground() == Color.RED) {
+			btnFF.setForeground(null);
+		}
+		else {
+			btnFF.setForeground(Color.RED);
+			btnRW.setForeground(null);
+		}
+	}
+
+	public void toggleRW() {
+		if (btnRW.getForeground() == Color.RED) {
+			btnRW.setForeground(null);
+		}
+		else {
+			btnRW.setForeground(Color.RED);
+			btnFF.setForeground(null);
+		}
 	}
 }

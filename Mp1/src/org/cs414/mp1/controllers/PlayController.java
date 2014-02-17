@@ -45,24 +45,24 @@ public class PlayController extends Controller
 
 				final Element colorSpace = ElementFactory.make("ffmpegcolorspace", null);
 
-				getPipeline().addMany(fileSrc, filter, parser, decoder, colorSpace, videoComponent.getElement());
+				getVideoPipe().addMany(fileSrc, filter, parser, decoder, colorSpace, videoComponent.getElement());
 				Element.linkMany(fileSrc, filter, parser, decoder,  colorSpace, videoComponent.getElement());
 
-				setState(State.PLAYING);
+				setVideoState(State.PLAYING);
 			}
 		});
 	}
 	
 	public void togglePause() {
-		if (getPipeline().getState() == State.PAUSED) {
+		if (getVideoPipe().getState() == State.PAUSED) {
 			// when resuming pased, set to normal playing
 			ePlayType = PlayType.NORMAL;
-			setState(State.PLAYING);
+			setVideoState(State.PLAYING);
 			SeekEvent seekEvent = new SeekEvent(1.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
-			getPipeline().sendEvent(seekEvent);
+			getVideoPipe().sendEvent(seekEvent);
 		}
 		else {
-			setState(State.PAUSED);
+			setVideoState(State.PAUSED);
 		}
 	}
 	
@@ -79,7 +79,7 @@ public class PlayController extends Controller
 			seekEvent = new SeekEvent(2.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
 		}
 		
-		getPipeline().sendEvent(seekEvent);
+		getVideoPipe().sendEvent(seekEvent);
 	}
 
 	public void toggleRW() {
@@ -94,7 +94,7 @@ public class PlayController extends Controller
 			//seekEvent = new SeekEvent(2.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
 		}
 		
-		getPipeline().sendEvent(seekEvent);
+		getVideoPipe().sendEvent(seekEvent);
 	}
 
 }

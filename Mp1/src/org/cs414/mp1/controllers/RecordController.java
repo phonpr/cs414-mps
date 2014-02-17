@@ -8,20 +8,36 @@ import org.cs414.mp1.frames.FrameVideo;
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
-import org.gstreamer.Pipeline;
 import org.gstreamer.State;
 import org.gstreamer.swing.VideoComponent;
 
 public class RecordController extends Controller {
+
+	/* 2014. 02. 17. S.H. CHA - using superclass's pipe
+	 * 
+	private static Pipeline videoPipe;
+	private static Pipeline audioPipe;
+	*/
 	
+	private String vidExt;
+	private String audExt;
+	
+	private int width;
+	private int height;
+	
+	private int framerate;
+	private VideoType eVideoType;
+	private AudioType eAudioType;
+
+
 	public RecordController(File file) {
 		super(file);
 		
-		this.width = 640;
-		this.height = 480;
-		framerate = 10;
-		vc = videoEnum.MJPEG;
-		ac = audioEnum.OGG;
+		this.width = VIDEO_DEFAULT_WIDTH;
+		this.height = VIDEO_DEFAULT_HEIGHT;
+		framerate = VIDEO_DEFAULT_RATE;
+		eVideoType = VideoType.MJPEG;
+		eAudioType = AudioType.OGG;
 	}
 	
 	/**
@@ -32,31 +48,16 @@ public class RecordController extends Controller {
 	 * @param vidType This enum needs to get moved
 	 * @param audType So does this one
 	 */
-	public RecordController(File file, int width, int height, int frames, videoEnum vidType, audioEnum audType ) {
+	public RecordController(File file, int width, int height, int frames, VideoType vidType, AudioType audType ) {
 		super(file);
 		
 		this.width = width;
 		this.height = height;
 		framerate = frames;
-		vc = vidType;
-		ac = audType;
+		eVideoType = vidType;
+		eAudioType = audType;
 	}
 	
-	public enum videoEnum { RAW, MJPEG, MPEG4 };
-    public enum audioEnum { RAW, OGG };
-    
-    private static Pipeline videoPipe;
-    private static Pipeline audioPipe;
-    
-    private String vidExt;
-    private String audExt;
-    private int width;
-    private int height;
-    private int framerate;
-    private videoEnum vc;
-    private audioEnum ac;
-    
-    
 	public void startRunning() {
 		final FrameVideo frameVideo = getFrameVideo();
 		final VideoComponent videoComponent = frameVideo.getVideoComponent();
@@ -67,13 +68,13 @@ public class RecordController extends Controller {
 				String fileDir = getFile().getParent();
 				String filename = getFile().getName();
 				getFrameVideo().setVisible(true);
-
 				
-		   	
+				/* 2014. 02. 17. S.H. CHA - using superclass's pipe
 		        videoPipe = new Pipeline("VideoTest");
 		        audioPipe = new Pipeline("AudioTest");
+		        */
 				
-		        final Element videoSrc = ElementFactory.make(LINUX_WBCAM_SRC, "source");
+		        final Element videoSrc = ElementFactory.make(VIDEO_TEST_SRC, "source");
 		        final Element audioSrc = ElementFactory.make("pulsesrc", "soundsrc");
 		        audioSrc.set("device", "alsa_input.pci-0000_00_1b.0.analog-stereo");
 		        
@@ -90,10 +91,14 @@ public class RecordController extends Controller {
 		        final Element videoQMonitor = ElementFactory.make("queue", "q2");
 		        final Element audioQFile = ElementFactory.make("queue", "q3");		        
 		        
-		        final Element videoEnc;
-		        final Element audioEnc;
+		        Element videoEnc = null;
+		        Element audioEnc = null;
 		        
-		        switch (vc) {
+		        switch (eVideoType) {
+		        case RAW:
+		        	videoEnc = null;
+		        	vidExt = ".avi";
+		        	break;
 		        case MJPEG:
 		        	videoEnc = ElementFactory.make("jpegenc", "Encoder");
 		        	vidExt = ".avi";
@@ -102,21 +107,19 @@ public class RecordController extends Controller {
 		        	videoEnc = ElementFactory.make("ffenc_mpeg4", "Encoder");
 		        	vidExt = ".mp4";
 		        	break;
-		        default:
-		        	videoEnc = null;
-		        	vidExt = ".avi";
-		        	break;
+		        default: break; // unsupported type
 		        }
 		        
-		        switch (ac) {
+		        switch (eAudioType) {
+		        case RAW:
+		        	audioEnc = ElementFactory.make("mulawenc", "soundEncoder");
+		        	audExt = ".pcm";
+		        	break;
 		        case OGG:
 		        	audioEnc = ElementFactory.make("vorbisenc", "soundEncoder");
 		        	audExt = ".ogg";
 		        	break;
-		        default:
-		        	audioEnc = ElementFactory.make("mulawenc", "soundEncoder");
-		        	audExt = ".pcm";
-		        	break;
+		        default: break; // unsupported type
 		        }
 		        
 		        final Element videoFile = ElementFactory.make("filesink", "Video sink");
@@ -125,8 +128,8 @@ public class RecordController extends Controller {
 		        audioFile.set("location", fileDir + "/" + filename + audExt);
 
 		        Element videosink = videoComponent.getElement();
-                videoPipe.addMany(videoSrc, videoTee, colorspace, videofilter, videoEnc, videoFile, videosink, videoQFile, videoQMonitor, videoMux);
-                audioPipe.addMany(audioSrc, audiofilter, audioQFile, audioEnc, audioMux, audioFile);
+                getVideoPipe().addMany(videoSrc, videoTee, colorspace, videofilter, videoEnc, videoFile, videosink, videoQFile, videoQMonitor, videoMux);
+                getAudioPipe().addMany(audioSrc, audiofilter, audioQFile, audioEnc, audioMux, audioFile);
                 
                 videoSrc.link(videoTee);
                 audioSrc.link(audioQFile, audiofilter);
@@ -134,7 +137,7 @@ public class RecordController extends Controller {
                 videoTee.link(videoQMonitor); videoQMonitor.link(videosink);
                 colorspace.link(videofilter);
                 
-                switch (vc) {
+                switch (eVideoType) {
                 case MPEG4:
                 	videofilter.link(videoEnc, videoFile);
                 case MJPEG:
@@ -143,7 +146,7 @@ public class RecordController extends Controller {
                 	videofilter.link(videoMux, videoFile);
                 }
                 
-                switch (ac) {
+                switch (eAudioType) {
                 case OGG:
                 	audiofilter.link(audioEnc, audioMux, audioFile);
                 default:
@@ -151,17 +154,13 @@ public class RecordController extends Controller {
                 }
                 
                 // Start the pipeline processing
-                videoPipe.setState(State.PLAYING);
-                audioPipe.setState(State.PLAYING);
+                setVideoState(State.PLAYING);
+                setAudioState(State.PLAYING);
 			}
 		});
 	}
 	
 	public void stopRunning() {
 		super.stopRunning();
-	}
-	
-	public void togglePause() {
-		//super.pauseRunning();
 	}
 }

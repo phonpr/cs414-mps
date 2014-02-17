@@ -1,4 +1,4 @@
-package org.cs414.mp1.listeners;
+package org.cs414.mp1.controllers;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -6,12 +6,12 @@ import java.io.File;
 
 import javax.swing.JFileChooser;
 
-import org.cs414.mp1.controllers.Controller;
-import org.cs414.mp1.controllers.PlayController;
-import org.cs414.mp1.controllers.RecordController;
+import org.cs414.mp1.controllers.Controller.AudioType;
+import org.cs414.mp1.controllers.Controller.VideoType;
+import org.cs414.mp1.frames.DialogRecordOptions;
 import org.cs414.mp1.frames.FrameVRemote;
 
-public class RemoteListener implements ActionListener {
+public class Listener implements ActionListener {
 	
 	public static final String ACTION_PLAY = "play";
 	public static final String ACTION_RECORD = "record";
@@ -24,10 +24,13 @@ public class RemoteListener implements ActionListener {
 	// frames
 	private FrameVRemote frameRemote = null;
 	
+	// dialog
+	private DialogRecordOptions dialogRecordOptions = null;
+	
 	// controller
 	private Controller controller = null;
 	
-	public RemoteListener(FrameVRemote frameRemote) {
+	public Listener(FrameVRemote frameRemote) {
 		this.frameRemote = frameRemote;
 	}
 
@@ -47,14 +50,25 @@ public class RemoteListener implements ActionListener {
 			}
 		}
 		else if (action == ACTION_RECORD) {
-			final JFileChooser fileChooser = new JFileChooser();
-			int nReturn = fileChooser.showSaveDialog(frameRemote);
-			if (nReturn == JFileChooser.APPROVE_OPTION) {
-				File file = fileChooser.getSelectedFile();
+			dialogRecordOptions = new DialogRecordOptions(frameRemote);
+			dialogRecordOptions.showOpenDialog();
+			if (dialogRecordOptions.isStartRecording()) {
+				int width = dialogRecordOptions.getVideoWidth();
+				int height = dialogRecordOptions.getVideoHeight();
+				int frameRate = dialogRecordOptions.getFrameRate();
+				VideoType videoType = dialogRecordOptions.getVideoType();
+				AudioType audioType = dialogRecordOptions.getAudioType();
 				
-				frameRemote.setRecording(file.getPath());
-				controller = new RecordController(file);
-				controller.startRunning();
+				final JFileChooser fileChooser = new JFileChooser();
+				int nReturn = fileChooser.showSaveDialog(frameRemote);
+				if (nReturn == JFileChooser.APPROVE_OPTION) {
+					File file = fileChooser.getSelectedFile();
+					
+					frameRemote.setRecording(file.getPath());
+					controller = new RecordController(
+						file, width, height, frameRate, videoType, audioType);
+					controller.startRunning();
+				}
 			}
 		}
 		else if (action == ACTION_STOP) {

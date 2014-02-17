@@ -10,7 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.cs414.mp1.listeners.RemoteListener;
+import org.cs414.mp1.controllers.Listener;
 
 public class FrameVRemote extends JFrame {
 	
@@ -102,19 +102,19 @@ public class FrameVRemote extends JFrame {
 		
 		// PlayRecordPanel listener
 		btnPlay.addActionListener(listener);
-		btnPlay.setActionCommand(RemoteListener.ACTION_PLAY);
+		btnPlay.setActionCommand(Listener.ACTION_PLAY);
 		btnRecord.addActionListener(listener);
-		btnRecord.setActionCommand(RemoteListener.ACTION_RECORD);
+		btnRecord.setActionCommand(Listener.ACTION_RECORD);
 		btnStop.addActionListener(listener);
-		btnStop.setActionCommand(RemoteListener.ACTION_STOP);
+		btnStop.setActionCommand(Listener.ACTION_STOP);
 		
 		// ControlPanel listener
 		btnPause.addActionListener(listener);
-		btnPause.setActionCommand(RemoteListener.ACTION_PAUSE);
+		btnPause.setActionCommand(Listener.ACTION_PAUSE);
 		btnFF.addActionListener(listener);
-		btnFF.setActionCommand(RemoteListener.ACTION_FF);
+		btnFF.setActionCommand(Listener.ACTION_FF);
 		btnRW.addActionListener(listener);
-		btnRW.setActionCommand(RemoteListener.ACTION_RW);
+		btnRW.setActionCommand(Listener.ACTION_RW);
 	}
 	
 	public void enablePlayRecord(boolean enable) {

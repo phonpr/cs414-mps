@@ -4,8 +4,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.SwingUtilities;
 
+import org.cs414.mp1.controllers.Listener;
 import org.cs414.mp1.frames.FrameVRemote;
-import org.cs414.mp1.listeners.RemoteListener;
 import org.gstreamer.Gst;
 
 public class Mp1 {
@@ -25,7 +25,7 @@ public class Mp1 {
 		frameVRemote = new FrameVRemote();
 		frameVRemote.initializeComponents();
 		
-		remoteListener = new RemoteListener(frameVRemote);
+		remoteListener = new Listener(frameVRemote);
 		
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {

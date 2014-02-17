@@ -1,10 +1,14 @@
-package org.cs414.mp1;
+package org.cs414.mp1.listeners;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.JFileChooser;
+
+import org.cs414.mp1.controllers.PlayController;
+import org.cs414.mp1.controllers.RecordController;
+import org.cs414.mp1.frames.FrameVRemote;
 
 public class RemoteListener implements ActionListener {
 	

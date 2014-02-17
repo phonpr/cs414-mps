@@ -1,4 +1,4 @@
-package org.cs414.mp1;
+package org.cs414.mp1.frames;
 
 import java.awt.event.ActionListener;
 
@@ -8,6 +8,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import org.cs414.mp1.listeners.RemoteListener;
 
 public class FrameVRemote extends JFrame {
 	

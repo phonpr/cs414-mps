@@ -1,7 +1,8 @@
-package org.cs414.mp1;
+package org.cs414.mp1.controllers;
 
 import java.io.File;
 
+import org.cs414.mp1.frames.FrameVideo;
 import org.gstreamer.Pipeline;
 import org.gstreamer.State;
 

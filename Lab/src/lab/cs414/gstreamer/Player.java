@@ -1,4 +1,4 @@
-package org.cs414.mp1;
+package lab.cs414.gstreamer;
 
 import org.gstreamer.*;
 import org.gstreamer.elements.DecodeBin;

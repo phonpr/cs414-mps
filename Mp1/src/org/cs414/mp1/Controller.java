@@ -1,8 +1,9 @@
 package org.cs414.mp1;
 
+import java.io.File;
+
 import org.gstreamer.Pipeline;
 import org.gstreamer.State;
-import org.gstreamer.swing.VideoComponent;
 
 public class Controller {
 	public static final String DEFAULT_CAPS_FILTER
@@ -12,23 +13,50 @@ public class Controller {
 	public static final String LINUX_WBCAM_SRC = "v4l2src";
 	public static final String VIDEO_TEST_SRC = "videotestsrc";
 
+	// video components
+	private FrameVideo frameVideo = null;
 	private Pipeline pipeline = null;
-	private VideoComponent videoComponent = null;
+	private File file = null;
 	
-	public Controller(Pipeline pipeline, VideoComponent videoComponent) {
-		this.pipeline = pipeline;
-		this.videoComponent = videoComponent;
+	public Controller(File file) {
+		frameVideo = new FrameVideo();
+		pipeline = new Pipeline();
+		this.file = file;
+		
+		frameVideo.initializeComponents();
 	}
 	
 	public Pipeline getPipeline() {
 		return pipeline;
 	}
 	
-	public VideoComponent getVideoComponent() {
-		return videoComponent;
+	public FrameVideo getFrameVideo() {
+		return frameVideo;
 	}
 	
+	public File getFile() {
+		return file;
+	}
+
 	public void setState(State state) {
 		pipeline.setState(state);
+	}
+	
+	/*
+	public void startRunning() {
+		setState(State.PLAYING);
+	}
+	
+	public void pauseRunning() {
+		setState(State.PAUSED);
+	}
+	*/
+	public void stopRunning() {
+		setState(State.NULL);
+		frameVideo.dispose();
+	}
+	
+	public boolean isRunning() {
+		return (pipeline.getState() == State.PLAYING);
 	}
 }

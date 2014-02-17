@@ -16,16 +16,30 @@ public class RecordController extends Controller {
 	
 	public RecordController(File file) {
 		super(file);
+		
+		this.width = 640;
+		this.height = 480;
+		framerate = 10;
+		vc = videoEnum.MJPEG;
+		ac = audioEnum.OGG;
 	}
 	
-	// Vidtype and audtype should probably just be enums after we move them.
-	public RecordController(File file, int width, int height, int frames, int vidType, int audType ) {
+	/**
+	 * @param file
+	 * @param width Width in pixels of video
+	 * @param height Height in pixels of video
+	 * @param frames Framerate in frames per second
+	 * @param vidType This enum needs to get moved
+	 * @param audType So does this one
+	 */
+	public RecordController(File file, int width, int height, int frames, videoEnum vidType, audioEnum audType ) {
 		super(file);
 		
 		this.width = width;
 		this.height = height;
 		framerate = frames;
-		
+		vc = vidType;
+		ac = audType;
 	}
 	
 	public enum videoEnum { RAW, MJPEG, MPEG4 };
@@ -36,11 +50,11 @@ public class RecordController extends Controller {
     
     private String vidExt;
     private String audExt;
-    private int width = 640;
-    private int height = 480;
-    private int framerate = 20;
-    private final videoEnum vc = videoEnum.MJPEG;
-    private final audioEnum ac = audioEnum.OGG;
+    private int width;
+    private int height;
+    private int framerate;
+    private videoEnum vc;
+    private audioEnum ac;
     
     
 	public void startRunning() {

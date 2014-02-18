@@ -25,6 +25,21 @@ public class PlayController extends Controller
 		super(file);
 	}
 
+	private class Monitor implements Runnable {
+		@Override
+		public void run() {
+			while(true) {
+				System.out.println(getVideoPipe().getState(1000L));
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					System.out.println("INTERRUPTED");
+					e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+				}
+			}
+		}
+	}
+
 	public void startRunning() {
 		final FrameVideo frameVideo = getFrameVideo();
 		final VideoComponent videoComponent = frameVideo.getVideoComponent();
@@ -49,6 +64,14 @@ public class PlayController extends Controller
 				Element.linkMany(fileSrc, filter, parser, decoder,  colorSpace, videoComponent.getElement());
 
 				setVideoState(State.PLAYING);
+				getVideoPipe().getBus().connect(new Bus.MESSAGE() {
+					@Override
+					public void busMessage(Bus bus, Message message) {
+						System.out.println("GOT MESSAGE: " + message.toString());
+					}
+				});
+
+				new Thread(new Monitor()).start();
 			}
 		});
 	}
@@ -57,9 +80,8 @@ public class PlayController extends Controller
 		if (getVideoPipe().getState() == State.PAUSED) {
 			// when resuming pased, set to normal playing
 			ePlayType = PlayType.NORMAL;
+			setNewRate(1.0);
 			setVideoState(State.PLAYING);
-			SeekEvent seekEvent = new SeekEvent(1.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
-			getVideoPipe().sendEvent(seekEvent);
 		}
 		else {
 			setVideoState(State.PAUSED);
@@ -68,33 +90,48 @@ public class PlayController extends Controller
 	
 	public void toggleFF()
 	{
-		SeekEvent seekEvent = null;
 		if (ePlayType == PlayType.FF) {
 			ePlayType = PlayType.NORMAL;
-			seekEvent = new SeekEvent(1.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
+			setNewRate(1.0);
 		}
 		else {
 			// case NORMAL or RW
 			ePlayType = PlayType.FF;
-			seekEvent = new SeekEvent(2.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
+			setNewRate(2.0);
 		}
-		
-		getVideoPipe().sendEvent(seekEvent);
+
+		getVideoPipe().setState(State.PLAYING);
 	}
 
 	public void toggleRW() {
-		SeekEvent seekEvent = null;
 		if (ePlayType == PlayType.RW) {
 			ePlayType = PlayType.NORMAL;
-			seekEvent = new SeekEvent(1.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
+			setNewRate(1.0);
 		}
 		else {
 			// case NORMAL or FF
 			ePlayType = PlayType.RW;
-			//seekEvent = new SeekEvent(2.0, Format.DEFAULT, SeekFlags.SKIP, SeekType.NONE, 0, SeekType.NONE, 0);
+			setNewRate(-1.0);
 		}
-		
-		getVideoPipe().sendEvent(seekEvent);
+		getVideoPipe().setState(State.PLAYING);
+	}
+
+	/**
+	 * Sets the rate of the playback to the specified rate
+	 */
+	private void setNewRate(double newRate) {
+
+		System.out.println("SETTING NEW RATE: " + newRate);
+
+		getVideoPipe().setState(State.PAUSED);
+		long currentTime = getVideoPipe().queryPosition(Format.TIME);
+		SeekEvent seekEvent = new SeekEvent(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, currentTime, SeekType.NONE, -1);
+		getVideoPipe().seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, currentTime, SeekType.NONE, -1);
+		//getVideoPipe().sendEvent(seekEvent);
+		getVideoPipe().setState(State.PLAYING);
+
+		//long currentTime = getVideoPipe().queryPosition(Format.TIME);
+		//
 	}
 
 }

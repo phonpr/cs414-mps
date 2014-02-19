@@ -26,6 +26,8 @@ public class RecordController extends Controller {
 	private int height;
 	
 	private int framerate;
+	private int samplerate;
+	
 	private VideoType eVideoType;
 	private AudioType eAudioType;
 	
@@ -34,15 +36,17 @@ public class RecordController extends Controller {
 	 * @param width Width in pixels of video
 	 * @param height Height in pixels of video
 	 * @param frames Framerate in frames per second
+	 * @param samples Samplerate in samples per second
 	 * @param vidType This enum needs to get moved
 	 * @param audType So does this one
 	 */
-	public RecordController(File file, int width, int height, int frames, VideoType vidType, AudioType audType ) {
+	public RecordController(File file, int width, int height, int frames, int samples, VideoType vidType, AudioType audType ) {
 		super(file);
 		
 		this.width = width;
 		this.height = height;
 		framerate = frames;
+		samplerate = samples;
 		eVideoType = vidType;
 		eAudioType = audType;
 	}
@@ -75,7 +79,9 @@ public class RecordController extends Controller {
 		        final Element videofilter = ElementFactory.make("capsfilter", "flt"); 
 		        videofilter.setCaps(Caps.fromString("video/x-raw-yuv,  width="+ width + ", height=" + height + ", framerate=" + framerate + "/1"));
 		        final Element videoMux = ElementFactory.make("avimux", "avimux");
-		        final Element audiofilter = ElementFactory.make("audioconvert", "audioconvert");
+		        final Element audiofilter = ElementFactory.make("capsfilter", "aflt");
+		        audiofilter.setCaps(Caps.fromString("audio/x-raw-int, rate=" + samplerate));
+		        final Element audioConverter = ElementFactory.make("audioconvert", "audioconvert");
 		        final Element audioMux = ElementFactory.make("oggmux", "oggmux");
 
 		        final Element videoQFile = ElementFactory.make("queue", "q1");
@@ -119,29 +125,37 @@ public class RecordController extends Controller {
 		        audioFile.set("location", fileDir + "/" + filename + audExt);
 
 		        Element videosink = videoComponent.getElement();
-                getVideoPipe().addMany(videoSrc, videoTee, colorspace, videofilter, videoEnc, videoFile, videosink, videoQFile, videoQMonitor, videoMux);
-                getAudioPipe().addMany(audioSrc, audiofilter, audioQFile, audioEnc, audioMux, audioFile);
+                getVideoPipe().addMany(videoSrc, videoTee, colorspace, videofilter, videoFile, videosink, videoQFile, videoQMonitor, videoMux);
+                getAudioPipe().addMany(audioSrc, audiofilter, audioConverter, audioQFile, audioMux, audioFile);
                 
                 videoSrc.link(videoTee);
-                audioSrc.link(audioQFile, audiofilter);
+                audioSrc.link(audioQFile, audiofilter, audioConverter);
                 videoTee.link(videoQFile); videoQFile.link(colorspace);
                 videoTee.link(videoQMonitor); videoQMonitor.link(videosink);
                 colorspace.link(videofilter);
                 
                 switch (eVideoType) {
                 case MPEG4:
+                	getVideoPipe().add(videoEnc);
                 	videofilter.link(videoEnc, videoFile);
+                	break;
                 case MJPEG:
+                	getVideoPipe().add(videoEnc);
                 	videofilter.link(videoEnc, videoMux, videoFile);
+                	break;
                 default:
                 	videofilter.link(videoMux, videoFile);
+                	break;
                 }
                 
                 switch (eAudioType) {
                 case OGG:
-                	audiofilter.link(audioEnc, audioMux, audioFile);
+                	getAudioPipe().add(audioEnc);
+                	audioConverter.link(audioEnc, audioMux, audioFile);
+                	break;
                 default:
-                	audiofilter.link(audioMux, audioFile);
+                	audioConverter.link(audioMux, audioFile);
+                	break;
                 }
                 
                 // Start the pipeline processing

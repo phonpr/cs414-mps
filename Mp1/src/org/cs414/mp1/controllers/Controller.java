@@ -18,6 +18,11 @@ public class Controller {
 		RAW		,
 		OGG
 	}
+	
+	public enum OperationType {
+		RECORDING	,
+		PLAYING		,
+	}
 
 	// constants
 	public static final String DEFAULT_CAPS_FILTER
@@ -42,8 +47,8 @@ public class Controller {
 	// audio components
 	private Pipeline audioPipe = null;
 	
-	public Controller(File file) {
-		frameVideo = new FrameVideo();
+	public Controller(File file, OperationType operation) {
+		frameVideo = new FrameVideo(operation);
 		videoPipe = new Pipeline();
 		audioPipe = new Pipeline();
 		this.file = file;

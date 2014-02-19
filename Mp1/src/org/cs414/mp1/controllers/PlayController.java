@@ -1,5 +1,6 @@
 package org.cs414.mp1.controllers;
 
+import org.cs414.mp1.controllers.Controller.OperationType;
 import org.cs414.mp1.views.FrameVideo;
 import org.gstreamer.*;
 import org.gstreamer.elements.FileSrc;
@@ -29,7 +30,7 @@ public class PlayController extends Controller
 	private PlayBin2 bin;
 
 	public PlayController(File file) {
-		super(file);
+		super(file, OperationType.PLAYING);
 	}
 
 	public void startRunning() {

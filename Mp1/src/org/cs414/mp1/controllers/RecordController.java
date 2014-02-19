@@ -5,10 +5,12 @@ import java.io.File;
 import javax.swing.SwingUtilities;
 
 import org.cs414.mp1.views.FrameVideo;
+import org.gstreamer.Buffer;
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.State;
+import org.gstreamer.elements.AppSink;
 import org.gstreamer.swing.VideoComponent;
 
 public class RecordController extends Controller {
@@ -31,6 +33,10 @@ public class RecordController extends Controller {
 	private VideoType eVideoType;
 	private AudioType eAudioType;
 	
+	private long compressTotal;
+	private long lastTime;
+	private int samplesSeen;
+	
 	/**
 	 * @param file
 	 * @param width Width in pixels of video
@@ -49,6 +55,8 @@ public class RecordController extends Controller {
 		samplerate = samples;
 		eVideoType = vidType;
 		eAudioType = audType;
+		compressTotal = 0;
+		samplesSeen = 0;
 	}
 	
 	public void startRunning() {
@@ -74,6 +82,7 @@ public class RecordController extends Controller {
 		        audioSrc.set("device", "alsa_input.pci-0000_00_1b.0.analog-stereo");
 		        
 		        final Element videoTee = ElementFactory.make("tee", "videoTee");
+		        final Element dataTee = ElementFactory.make("tee", "dataTee");
 		        
 		        final Element colorspace = ElementFactory.make("ffmpegcolorspace", "colorspace");
 		        final Element videofilter = ElementFactory.make("capsfilter", "flt"); 
@@ -86,6 +95,7 @@ public class RecordController extends Controller {
 
 		        final Element videoQFile = ElementFactory.make("queue", "q1");
 		        final Element videoQMonitor = ElementFactory.make("queue", "q2");
+		        final Element videoQData = ElementFactory.make("queue", "q4");
 		        final Element audioQFile = ElementFactory.make("queue", "q3");		        
 		        
 		        Element videoEnc = null;
@@ -123,9 +133,32 @@ public class RecordController extends Controller {
 		        final Element audioFile = ElementFactory.make("filesink", "Audio sink");
 		        videoFile.set("location", fileDir + "/" + filename + vidExt);
 		        audioFile.set("location", fileDir + "/" + filename + audExt);
+		        
+		        final AppSink videoApp = (AppSink) ElementFactory.make("appsink", "datasink");
+		        videoApp.set ("emit-signals", true);
+		        videoApp.setSync(false);
+		        videoApp.connect(new AppSink.NEW_BUFFER (){
+					@Override
+					public void newBuffer(AppSink arg0) {
+						Buffer temp = arg0.getLastBuffer();
+						long time = temp.getTimestamp().toMillis();	
+						
+						if (samplesSeen == 0) {
+							lastTime = time;
+							samplesSeen++;
+						} else {	
+							if (time != 0) {
+							compressTotal += (time - lastTime);
+							lastTime = time;
+							samplesSeen++;
+							System.out.println(time);
+							}
+						}
+					}
+		        });
 
 		        Element videosink = videoComponent.getElement();
-                getVideoPipe().addMany(videoSrc, videoTee, colorspace, videofilter, videoFile, videosink, videoQFile, videoQMonitor, videoMux);
+                getVideoPipe().addMany(videoSrc, videoTee, colorspace, videofilter, videoFile, videosink, videoQFile, videoQMonitor, videoMux, dataTee, videoQData, videoApp);
                 getAudioPipe().addMany(audioSrc, audiofilter, audioConverter, audioQFile, audioMux, audioFile);
                 
                 videoSrc.link(videoTee);
@@ -137,16 +170,18 @@ public class RecordController extends Controller {
                 switch (eVideoType) {
                 case MPEG4:
                 	getVideoPipe().add(videoEnc);
-                	videofilter.link(videoEnc, videoFile);
+                	videofilter.link(videoEnc, dataTee, videoFile);
                 	break;
                 case MJPEG:
                 	getVideoPipe().add(videoEnc);
-                	videofilter.link(videoEnc, videoMux, videoFile);
+                	videofilter.link(videoEnc,  videoMux, dataTee, videoFile);
                 	break;
                 default:
-                	videofilter.link(videoMux, videoFile);
+                	videofilter.link( videoMux, dataTee, videoFile);
                 	break;
                 }
+                
+                dataTee.link(videoQData, videoApp);
                 
                 switch (eAudioType) {
                 case OGG:
@@ -164,7 +199,7 @@ public class RecordController extends Controller {
 			}
 		});
 	}
-	
+		
 	public void stopRunning() {
 		super.stopRunning();
 	}

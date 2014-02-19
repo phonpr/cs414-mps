@@ -67,7 +67,7 @@ public class Listener implements ActionListener {
 					
 					frameRemote.setRecording(file.getPath());
 					controller = new RecordController(
-						file, width, height, frameRate, videoType, audioType);
+						file, width, height, frameRate, samplingRate, videoType, audioType);
 					controller.startRunning();
 				}
 			}

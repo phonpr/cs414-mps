@@ -4,6 +4,10 @@ import org.cs414.mp1.views.FrameVideo;
 import org.gstreamer.*;
 import org.gstreamer.elements.FileSrc;
 import org.gstreamer.event.SeekEvent;
+import org.gstreamer.message.ErrorMessage;
+import org.gstreamer.message.GErrorMessage;
+import org.gstreamer.message.InfoMessage;
+import org.gstreamer.message.WarningMessage;
 import org.gstreamer.swing.VideoComponent;
 
 import java.io.File;
@@ -20,7 +24,9 @@ public class PlayController extends Controller
 	}
 	
 	private PlayType ePlayType = PlayType.NORMAL;
-	
+
+	private Element videoSink;
+
 	public PlayController(File file) {
 		super(file);
 	}
@@ -60,14 +66,25 @@ public class PlayController extends Controller
 
 				final Element colorSpace = ElementFactory.make("ffmpegcolorspace", null);
 
-				getVideoPipe().addMany(fileSrc, filter, parser, decoder, colorSpace, videoComponent.getElement());
-				Element.linkMany(fileSrc, filter, parser, decoder,  colorSpace, videoComponent.getElement());
+				videoSink = videoComponent.getElement();
+
+				getVideoPipe().addMany(fileSrc, filter, parser, decoder, colorSpace, videoSink);
+				Element.linkMany(fileSrc, filter, parser, decoder,  colorSpace, videoSink);
 
 				setVideoState(State.PLAYING);
 				getVideoPipe().getBus().connect(new Bus.MESSAGE() {
 					@Override
 					public void busMessage(Bus bus, Message message) {
-						System.out.println("GOT MESSAGE: " + message.toString());
+						System.out.println("GOT MESSAGE: " + message.getType());
+						if(message.getType() == MessageType.ERROR) {
+							System.out.println("MESSAGE: " + ((ErrorMessage) message).getMessage());
+						}
+						else if(message.getType() == MessageType.INFO) {
+							System.out.println("MESSAGE: " + ((InfoMessage) message).getMessage());
+						}
+						else if(message.getType() == MessageType.WARNING) {
+							System.out.println("MESSAGE: " + ((WarningMessage) message).getMessage());
+						}
 					}
 				});
 
@@ -79,8 +96,8 @@ public class PlayController extends Controller
 	public void togglePause() {
 		if (getVideoPipe().getState() == State.PAUSED) {
 			// when resuming pased, set to normal playing
-			ePlayType = PlayType.NORMAL;
-			setNewRate(1.0);
+			//ePlayType = PlayType.NORMAL;
+			//setNewRate(1.0);
 			setVideoState(State.PLAYING);
 		}
 		else {
@@ -125,13 +142,26 @@ public class PlayController extends Controller
 
 		getVideoPipe().setState(State.PAUSED);
 		long currentTime = getVideoPipe().queryPosition(Format.TIME);
-		SeekEvent seekEvent = new SeekEvent(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, currentTime, SeekType.NONE, -1);
-		getVideoPipe().seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, currentTime, SeekType.NONE, -1);
-		//getVideoPipe().sendEvent(seekEvent);
 		getVideoPipe().setState(State.PLAYING);
 
-		//long currentTime = getVideoPipe().queryPosition(Format.TIME);
-		//
+		boolean success;
+
+		System.out.println("HELLO1");
+		if(newRate >= 0.0) {
+			//SeekEvent seekEvent = new SeekEvent(newRate, Format.TIME, SeekFlags.FLUSH | SeekFlags.SKIP, SeekType.SET, currentTime, SeekType.NONE, 0);
+			//success = videoSink.sendEvent(seekEvent);
+			System.out.println("BEFORE SENDING EVENT: " + getVideoPipe().getState());
+			success = getVideoPipe().seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, currentTime, SeekType.NONE, 0);
+		}
+		else {
+			SeekEvent seekEvent = new SeekEvent(newRate, Format.TIME, SeekFlags.NONE, SeekType.SET, 0, SeekType.SET, currentTime);
+			System.out.println("BEFORE SENDING EVENT: " + getVideoPipe().getState());
+			success = videoSink.sendEvent(seekEvent);
+		}
+		System.out.println("HELLO2");
+		System.out.println(success);
+		getVideoPipe().setState(State.PLAYING);
+		System.out.println("HELLO3");
 	}
 
 }

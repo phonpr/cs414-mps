@@ -37,6 +37,8 @@ public class RecordController extends Controller {
 	private long lastTime;
 	private int samplesSeen;
 	
+	private int rawSize;
+	
 	/**
 	 * @param file
 	 * @param width Width in pixels of video
@@ -57,6 +59,7 @@ public class RecordController extends Controller {
 		eAudioType = audType;
 		compressTotal = 0;
 		samplesSeen = 0;
+		rawSize = 2 * width * height;
 	}
 	
 	public void startRunning() {
@@ -142,6 +145,9 @@ public class RecordController extends Controller {
 					public void newBuffer(AppSink arg0) {
 						Buffer temp = arg0.getLastBuffer();
 						long time = temp.getTimestamp().toMillis();	
+						int size = temp.getSize();
+						if (size <= 8)
+							return;
 						
 						if (samplesSeen == 0) {
 							lastTime = time;
@@ -154,6 +160,7 @@ public class RecordController extends Controller {
 								System.out.println(compressTotal / samplesSeen);
 							}
 						}
+						System.out.println(size);
 					}
 		        });
 

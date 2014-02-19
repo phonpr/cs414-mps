@@ -56,6 +56,7 @@ public class Listener implements ActionListener {
 				int width = dialogRecordOptions.getVideoWidth();
 				int height = dialogRecordOptions.getVideoHeight();
 				int frameRate = dialogRecordOptions.getFrameRate();
+				int samplingRate = dialogRecordOptions.getSamplingRate();
 				VideoType videoType = dialogRecordOptions.getVideoType();
 				AudioType audioType = dialogRecordOptions.getAudioType();
 				

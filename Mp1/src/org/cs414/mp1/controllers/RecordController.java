@@ -26,8 +26,6 @@ public class RecordController extends Controller {
 	private int height;
 	
 	private int framerate;
-	private int audioRate;
-	
 	private VideoType eVideoType;
 	private AudioType eAudioType;
 	
@@ -47,7 +45,6 @@ public class RecordController extends Controller {
 		framerate = frames;
 		eVideoType = vidType;
 		eAudioType = audType;
-		audioRate = 44100;
 	}
 	
 	public void startRunning() {
@@ -79,8 +76,6 @@ public class RecordController extends Controller {
 		        videofilter.setCaps(Caps.fromString("video/x-raw-yuv,  width="+ width + ", height=" + height + ", framerate=" + framerate + "/1"));
 		        final Element videoMux = ElementFactory.make("avimux", "avimux");
 		        final Element audiofilter = ElementFactory.make("audioconvert", "audioconvert");
-		        final Element audioSample = ElementFactory.make("audioresample", "resampler");
-		        audioSample.setCaps(Caps.fromString("audio/x-raw, rate=" + audioRate));
 		        final Element audioMux = ElementFactory.make("oggmux", "oggmux");
 
 		        final Element videoQFile = ElementFactory.make("queue", "q1");
@@ -96,11 +91,11 @@ public class RecordController extends Controller {
 		        	vidExt = ".avi";
 		        	break;
 		        case MJPEG:
-		        	videoEnc = ElementFactory.make("jpegenc", "jpegEncoder");
+		        	videoEnc = ElementFactory.make("jpegenc", "Encoder");
 		        	vidExt = ".avi";
 		        	break;
 		        case MPEG4:
-		        	videoEnc = ElementFactory.make("ffenc_mpeg4", "mp4Encoder");
+		        	videoEnc = ElementFactory.make("ffenc_mpeg4", "Encoder");
 		        	vidExt = ".mp4";
 		        	break;
 		        default: break; // unsupported type
@@ -124,8 +119,8 @@ public class RecordController extends Controller {
 		        audioFile.set("location", fileDir + "/" + filename + audExt);
 
 		        Element videosink = videoComponent.getElement();
-                getVideoPipe().addMany(videoSrc, videoTee, colorspace, videofilter, videoFile, videosink, videoQFile, videoQMonitor, videoMux);
-                getAudioPipe().addMany(audioSrc, audiofilter, audioQFile,  audioMux, audioFile);
+                getVideoPipe().addMany(videoSrc, videoTee, colorspace, videofilter, videoEnc, videoFile, videosink, videoQFile, videoQMonitor, videoMux);
+                getAudioPipe().addMany(audioSrc, audiofilter, audioQFile, audioEnc, audioMux, audioFile);
                 
                 videoSrc.link(videoTee);
                 audioSrc.link(audioQFile, audiofilter);
@@ -135,26 +130,18 @@ public class RecordController extends Controller {
                 
                 switch (eVideoType) {
                 case MPEG4:
-                	getVideoPipe().add(videoEnc);
                 	videofilter.link(videoEnc, videoFile);
-                	break;
                 case MJPEG:
-                	getVideoPipe().add(videoEnc);
                 	videofilter.link(videoEnc, videoMux, videoFile);
-                	break;
                 default:
                 	videofilter.link(videoMux, videoFile);
-                	break;
                 }
                 
                 switch (eAudioType) {
                 case OGG:
-                	getAudioPipe().add(audioEnc);
                 	audiofilter.link(audioEnc, audioMux, audioFile);
-                	break;
                 default:
                 	audiofilter.link(audioMux, audioFile);
-                	break;
                 }
                 
                 // Start the pipeline processing

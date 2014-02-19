@@ -29,13 +29,15 @@ public class DialogRecordOptions extends JDialog {
 	
 	// UI components
 	private JPanel panelSize = null;
+	private JPanel panelRate = null;
 	private JPanel panelVideoType = null;
 	private JPanel panelAudioType = null;
 	private JPanel panelButtons = null;
 	
 	private JTextField textWidth = null;
 	private JTextField textHeight = null;
-	private JTextField textRate = null;
+	private JTextField textFrameRate = null;
+	private JTextField textSamplingRate = null;
 	
 	private JRadioButton radioVideoRaw = null;
 	private JRadioButton radioVideoMjpeg = null;
@@ -64,7 +66,11 @@ public class DialogRecordOptions extends JDialog {
 	}
 	
 	public int getFrameRate() {
-		return Integer.parseInt(textRate.getText());
+		return Integer.parseInt(textFrameRate.getText());
+	}
+	
+	public int getSamplingRate() {
+		return Integer.parseInt(textSamplingRate.getText());
 	}
 
 	public boolean isStartRecording() {
@@ -81,6 +87,7 @@ public class DialogRecordOptions extends JDialog {
 	
 	public void initializeComponents() {
 		panelSize = new JPanel();
+		panelRate = new JPanel();
 		panelVideoType = new JPanel();
 		panelAudioType = new JPanel();
 		panelButtons = new JPanel();
@@ -91,6 +98,7 @@ public class DialogRecordOptions extends JDialog {
 		setResizable(false);
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 		getContentPane().add(panelSize);
+		getContentPane().add(panelRate);
 		getContentPane().add(panelVideoType);
 		getContentPane().add(panelAudioType);
 		getContentPane().add(panelButtons);
@@ -102,15 +110,22 @@ public class DialogRecordOptions extends JDialog {
 		textHeight = new JTextField();
 		textHeight.setColumns(4);
 		textHeight.setText(Integer.toString(Controller.VIDEO_DEFAULT_HEIGHT));
-		textRate = new JTextField();
-		textRate.setColumns(4);
-		textRate.setText(Integer.toString(Controller.VIDEO_DEFAULT_RATE));
 		panelSize.add(new JLabel("Width : "));
 		panelSize.add(textWidth);
 		panelSize.add(new JLabel("Height : "));
 		panelSize.add(textHeight);
-		panelSize.add(new JLabel("Rate : "));
-		panelSize.add(textRate);
+		
+		// rate panel
+		textFrameRate = new JTextField();
+		textFrameRate.setColumns(4);
+		textFrameRate.setText(Integer.toString(Controller.VIDEO_DEFAULT_RATE));
+		textSamplingRate = new JTextField();
+		textSamplingRate.setColumns(6);
+		textSamplingRate.setText(Integer.toString(Controller.AUDIO_DEFAULT_RATE));
+		panelRate.add(new JLabel("Frame Rate : "));
+		panelRate.add(textFrameRate);
+		panelRate.add(new JLabel("Sampling Rate : "));
+		panelRate.add(textSamplingRate);
 		
 		// video type panel
 		panelVideoType.add(new JLabel("Video Type : "));

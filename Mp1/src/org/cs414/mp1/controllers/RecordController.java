@@ -148,10 +148,10 @@ public class RecordController extends Controller {
 							samplesSeen++;
 						} else {	
 							if (time != 0) {
-							compressTotal += (time - lastTime);
-							lastTime = time;
-							samplesSeen++;
-							System.out.println(time);
+								compressTotal += (time - lastTime);
+								lastTime = time;
+								samplesSeen++;
+								System.out.println(compressTotal / samplesSeen);
 							}
 						}
 					}

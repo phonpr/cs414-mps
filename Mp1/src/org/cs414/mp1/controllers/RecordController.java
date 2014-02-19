@@ -157,10 +157,10 @@ public class RecordController extends Controller {
 								compressTotal += (time - lastTime);
 								lastTime = time;
 								samplesSeen++;
-								System.out.println(compressTotal / samplesSeen);
+								getFrameVideo().updateCompressionTime((int) (compressTotal / samplesSeen));
 							}
 						}
-						System.out.println(size);
+						getFrameVideo().updateCompressionSize(size);
 					}
 		        });
 

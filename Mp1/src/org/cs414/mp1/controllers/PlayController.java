@@ -35,6 +35,17 @@ public class PlayController extends Controller
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+
+				//Detect whether or not it is a video file or an audio file
+				String[] fileNameSplit = getFile().getName().split("\\.");
+				String fileExtension = fileNameSplit[fileNameSplit.length - 1];
+
+				boolean audio = false;
+				if("pcm".equals(fileExtension) || "ogg".equals(fileExtension)) {
+					audio = true;
+				}
+
+
 				getFrameVideo().setVisible(true);
 				
 				final FileSrc fileSrc = new FileSrc("fileSrc");
@@ -47,19 +58,33 @@ public class PlayController extends Controller
 				AppSink appSink = (AppSink) ElementFactory.make("appsink", "appSink");
 				final Element tee = ElementFactory.make("tee", "tee");
 				Element videoQ = ElementFactory.make("queue", "videoQ");
-
+				Element audioSink = ElementFactory.make("autoaudiosink", "audioSink");
 
 				final Element videoElement = videoComponent.getElement();
 
-				getVideoPipe().addMany(fileSrc, decodeBin, appSinkQ, appSink, tee, videoQ, videoElement);
-				decodeBin.connect(new DecodeBin2.NEW_DECODED_PAD() {
-					public void newDecodedPad(DecodeBin2 element, Pad pad, boolean bool) {
-						element.link(tee);
-					}
-				});
-				fileSrc.link(decodeBin);
-				tee.link(appSinkQ, appSink);
-				tee.link(videoQ, videoComponent.getElement());
+
+				if(audio) {
+					getVideoPipe().addMany(fileSrc, decodeBin, appSinkQ, appSink, tee, videoQ, audioSink);
+					decodeBin.connect(new DecodeBin2.NEW_DECODED_PAD() {
+						public void newDecodedPad(DecodeBin2 element, Pad pad, boolean bool) {
+							element.link(tee);
+						}
+					});
+					fileSrc.link(decodeBin);
+					tee.link(appSinkQ, appSink);
+					tee.link(videoQ, audioSink);
+				}
+				else {
+					getVideoPipe().addMany(fileSrc, decodeBin, appSinkQ, appSink, tee, videoQ, videoElement);
+					decodeBin.connect(new DecodeBin2.NEW_DECODED_PAD() {
+						public void newDecodedPad(DecodeBin2 element, Pad pad, boolean bool) {
+							element.link(tee);
+						}
+					});
+					fileSrc.link(decodeBin);
+					tee.link(appSinkQ, appSink);
+					tee.link(videoQ, videoComponent.getElement());
+				}
 				//--gst-debug-level=7
 
 				appSink.set("emit-signals", true);

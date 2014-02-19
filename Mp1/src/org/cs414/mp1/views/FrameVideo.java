@@ -10,6 +10,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.cs414.mp1.controllers.Controller;
+import org.cs414.mp1.controllers.Controller.OperationType;
 import org.gstreamer.swing.VideoComponent;
 
 public class FrameVideo extends JFrame {
@@ -30,7 +32,16 @@ public class FrameVideo extends JFrame {
 	private JPanel panelMonitor = null;
 	private VideoComponent videoComponent = null;
 	private JTextField textCompressionTime = null;
-	private JTextField textCompressionSize = null;
+	private JTextField textDecompressionTime = null;
+	private JTextField textCompressionRatio = null;
+	private JTextField textCompressedSize = null;
+	
+	// logics
+	private OperationType eOperationType = null;
+	
+	public FrameVideo(OperationType operation) {
+		eOperationType = operation;
+	}
 	
 	public void initializeComponents() {
 		panelVideo = new JPanel();
@@ -51,23 +62,44 @@ public class FrameVideo extends JFrame {
 		panelVideo.add(videoComponent, BorderLayout.CENTER);
 		
 		// monitor panel
-		textCompressionTime = new JTextField();
-		textCompressionTime.setColumns(10);
-		textCompressionTime.setEditable(false);
-		textCompressionSize = new JTextField();
-		textCompressionSize.setColumns(10);
-		textCompressionSize.setEditable(false);
-		panelMonitor.add(new JLabel("Compression Time :"));
-		panelMonitor.add(textCompressionTime);
-		panelMonitor.add(new JLabel("Compression Size :"));
-		panelMonitor.add(textCompressionSize);
+		// record / play
+		if (eOperationType == OperationType.RECORDING) {
+			textCompressionTime = new JTextField();
+			textCompressionTime.setColumns(6);
+			textCompressionTime.setEditable(false);
+			panelMonitor.add(new JLabel("Compression Time :"));
+			panelMonitor.add(textCompressionTime);
+		}
+		else if (eOperationType == OperationType.PLAYING) {
+			textDecompressionTime = new JTextField();
+			textDecompressionTime.setColumns(6);
+			textDecompressionTime.setEditable(false);
+			panelMonitor.add(new JLabel("Decompression Time :"));
+			panelMonitor.add(textDecompressionTime);
+		}
+		else ;
+		
+		// common
+		textCompressionRatio = new JTextField();
+		textCompressionRatio.setColumns(6);
+		textCompressionRatio.setEditable(false);
+		textCompressedSize = new JTextField();
+		textCompressedSize.setColumns(6);
+		textCompressedSize.setEditable(false);
+		
+		panelMonitor.add(new JLabel("Compression Ratio :"));
+		panelMonitor.add(textCompressionRatio);
+		panelMonitor.add(new JLabel("Compressed Size :"));
+		panelMonitor.add(textCompressedSize);
 		
 		updateSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
  		videoComponent.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
  		
  		// set initial compression monitor information to 0
  		updateCompressionTime(0);
- 		updateCompressionSize(0);
+ 		updateDecompressionTime(0);
+ 		updateCompressionRatio(0);
+ 		updateCompressedSize(0);
 	}
 	
 	public void updateSize(int width, int height) {
@@ -79,11 +111,23 @@ public class FrameVideo extends JFrame {
 	}
 	
 	public void updateCompressionTime(int time) {
-		textCompressionTime.setText(Integer.toString(time));
+		if (eOperationType == OperationType.RECORDING) {
+			textCompressionTime.setText(Integer.toString(time));
+		}
 	}
 	
-	public void updateCompressionSize(int size) {
-		textCompressionSize.setText(Integer.toString(size));
+	public void updateDecompressionTime(int time) {
+		if (eOperationType == OperationType.PLAYING) {
+			textDecompressionTime.setText(Integer.toString(time));
+		}
+	}
+	
+	public void updateCompressionRatio(double ratio) {
+		textCompressionRatio.setText(Double.toString(ratio));
+	}
+	
+	public void updateCompressedSize(int size) {
+		textCompressedSize.setText(Integer.toString(size));
 	}
 	
 	public VideoComponent getVideoComponent() {

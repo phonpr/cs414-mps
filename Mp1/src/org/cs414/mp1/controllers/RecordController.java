@@ -66,7 +66,7 @@ public class RecordController extends Controller {
 		        */
 				
 		        final Element videoSrc = ElementFactory.make(WINDOWS_WEBCAM_SRC, "source");
-		        final Element audioSrc = ElementFactory.make(AUDIO_TEST_SRC, "soundsrc");
+		        final Element audioSrc = ElementFactory.make(LINUX_AUDIO_SRC, "soundsrc");
 		        audioSrc.set("device", "alsa_input.pci-0000_00_1b.0.analog-stereo");
 		        
 		        final Element videoTee = ElementFactory.make("tee", "videoTee");

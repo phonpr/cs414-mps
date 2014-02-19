@@ -31,7 +31,8 @@ public class Controller {
 	
 	public static int VIDEO_DEFAULT_WIDTH = 640;
 	public static int VIDEO_DEFAULT_HEIGHT = 480;
-	public static int VIDEO_DEFAULT_RATE =10;
+	public static int VIDEO_DEFAULT_RATE = 10;
+	public static int AUDIO_DEFAULT_RATE = 44100;
 
 	// video components
 	private FrameVideo frameVideo = null;

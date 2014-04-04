@@ -3,16 +3,11 @@ package org.cs414.mp1.controllers;
 import org.cs414.mp1.controllers.Controller.OperationType;
 import org.cs414.mp1.views.FrameVideo;
 import org.gstreamer.*;
-import org.gstreamer.elements.FileSrc;
-import org.gstreamer.elements.PlayBin2;
-import org.gstreamer.event.SeekEvent;
-import org.gstreamer.message.ErrorMessage;
-import org.gstreamer.message.GErrorMessage;
-import org.gstreamer.message.InfoMessage;
-import org.gstreamer.message.WarningMessage;
+import org.gstreamer.elements.*;
 import org.gstreamer.swing.VideoComponent;
 
 import java.io.File;
+import java.util.List;
 
 import javax.swing.SwingUtilities;
 
@@ -27,7 +22,7 @@ public class PlayController extends Controller
 	
 	private PlayType ePlayType = PlayType.NORMAL;
 
-	private PlayBin2 bin;
+	private long lastTime = 0L;
 
 	public PlayController(File file) {
 		super(file, OperationType.PLAYING);
@@ -40,15 +35,79 @@ public class PlayController extends Controller
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+
+				//Detect whether or not it is a video file or an audio file
+				String[] fileNameSplit = getFile().getName().split("\\.");
+				String fileExtension = fileNameSplit[fileNameSplit.length - 1];
+
+				boolean audio = false;
+				if("pcm".equals(fileExtension) || "ogg".equals(fileExtension)) {
+					audio = true;
+				}
+
+
 				getFrameVideo().setVisible(true);
 				
 				final FileSrc fileSrc = new FileSrc("fileSrc");
 				fileSrc.setLocation(getFile());
 
-				bin = new PlayBin2("bin");
-				bin.setInputFile(getFile());
-				bin.setVideoSink(videoComponent.getElement());
-				bin.setState(State.PLAYING);
+				//Element decodeBin = ElementFactory.make("decodebin2", null);
+				DecodeBin2 decodeBin = new DecodeBin2("bin");
+
+				Element appSinkQ = ElementFactory.make("queue", "appSinkQ");
+				AppSink appSink = (AppSink) ElementFactory.make("appsink", "appSink");
+				final Element tee = ElementFactory.make("tee", "tee");
+				Element videoQ = ElementFactory.make("queue", "videoQ");
+				Element audioSink = ElementFactory.make("autoaudiosink", "audioSink");
+
+				final Element videoElement = videoComponent.getElement();
+
+
+				if(audio) {
+					getVideoPipe().addMany(fileSrc, decodeBin, appSinkQ, appSink, tee, videoQ, audioSink);
+					decodeBin.connect(new DecodeBin2.NEW_DECODED_PAD() {
+						public void newDecodedPad(DecodeBin2 element, Pad pad, boolean bool) {
+							element.link(tee);
+						}
+					});
+					fileSrc.link(decodeBin);
+					tee.link(appSinkQ, appSink);
+					tee.link(videoQ, audioSink);
+				}
+				else {
+					getVideoPipe().addMany(fileSrc, decodeBin, appSinkQ, appSink, tee, videoQ, videoElement);
+					decodeBin.connect(new DecodeBin2.NEW_DECODED_PAD() {
+						public void newDecodedPad(DecodeBin2 element, Pad pad, boolean bool) {
+							element.link(tee);
+						}
+					});
+					fileSrc.link(decodeBin);
+					tee.link(appSinkQ, appSink);
+					tee.link(videoQ, videoComponent.getElement());
+				}
+				//--gst-debug-level=7
+
+				appSink.set("emit-signals", true);
+				appSink.setSync(false);
+				appSink.connect(new AppSink.NEW_BUFFER (){
+					@Override
+					public void newBuffer(AppSink arg0) {
+						Buffer temp = arg0.getLastBuffer();
+						long time = temp.getTimestamp().toMillis();
+
+						if(lastTime != 0L) {
+							System.out.println(time + " " + lastTime);
+							System.out.println(time - lastTime);
+							getFrameVideo().updateDecompressionTime((int)(time - lastTime));
+						}
+						lastTime = time;
+					}
+				});
+
+
+				getVideoPipe().setState(State.PLAYING);
+
+
 				/*
 				//AVI playback
 				if("avi".equals(fileExtension)) {
@@ -94,14 +153,14 @@ public class PlayController extends Controller
 	}
 	
 	public void togglePause() {
-		if (bin.getState() == State.PAUSED) {
+		if (getVideoPipe().getState() == State.PAUSED) {
 			// when resuming pased, set to normal playing
 			ePlayType = PlayType.NORMAL;
 			setNewRate(1.0);
-			bin.setState(State.PLAYING);
+			getVideoPipe().setState(State.PLAYING);
 		}
 		else {
-			bin.setState(State.PAUSED);
+			getVideoPipe().setState(State.PAUSED);
 		}
 	}
 	
@@ -137,17 +196,17 @@ public class PlayController extends Controller
 
 		System.out.println("SETTING NEW RATE: " + newRate);
 
-		bin.setState(State.PAUSED);
-		long currentTime = bin.queryPosition(Format.TIME);
-		bin.setState(State.PLAYING);
+		getVideoPipe().setState(State.PAUSED);
+		long currentTime = getVideoPipe().queryPosition(Format.TIME);
+		System.out.println(currentTime);
+		getVideoPipe().setState(State.PLAYING);
 
 		if(newRate >= 0.0) {
-			bin.seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, currentTime, SeekType.SET, -1);
+			getVideoPipe().seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, currentTime, SeekType.NONE, -1);
 		}
 		else {
-			bin.seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, 0, SeekType.SET, currentTime);
+			getVideoPipe().seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, 0, SeekType.SET, currentTime);
 		}
 
 	}
-
 }

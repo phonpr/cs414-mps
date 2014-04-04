@@ -37,6 +37,8 @@ public class RecordController extends Controller {
 	private long lastTime;
 	private int samplesSeen;
 	
+	private int rawSize;
+	
 	/**
 	 * @param file
 	 * @param width Width in pixels of video
@@ -57,6 +59,7 @@ public class RecordController extends Controller {
 		eAudioType = audType;
 		compressTotal = 0;
 		samplesSeen = 0;
+		rawSize = 2 * width * height;
 	}
 	
 	public void startRunning() {
@@ -89,7 +92,7 @@ public class RecordController extends Controller {
 		        videofilter.setCaps(Caps.fromString("video/x-raw-yuv,  width="+ width + ", height=" + height + ", framerate=" + framerate + "/1"));
 		        final Element videoMux = ElementFactory.make("avimux", "avimux");
 		        final Element audiofilter = ElementFactory.make("capsfilter", "aflt");
-		        audiofilter.setCaps(Caps.fromString("audio/x-raw-int, rate=" + samplerate));
+		        audiofilter.setCaps(Caps.fromString("audio/x-raw-int, channels=1, endianness=1234, width=16, depth=16, signed=true, rate=" + samplerate));
 		        final Element audioConverter = ElementFactory.make("audioconvert", "audioconvert");
 		        final Element audioMux = ElementFactory.make("oggmux", "oggmux");
 
@@ -119,7 +122,7 @@ public class RecordController extends Controller {
 		        
 		        switch (eAudioType) {
 		        case RAW:
-		        	audioEnc = ElementFactory.make("mulawenc", "soundEncoder");
+		        	audioEnc = null;
 		        	audExt = ".pcm";
 		        	break;
 		        case OGG:
@@ -142,6 +145,9 @@ public class RecordController extends Controller {
 					public void newBuffer(AppSink arg0) {
 						Buffer temp = arg0.getLastBuffer();
 						long time = temp.getTimestamp().toMillis();	
+						int size = temp.getSize();
+						if (size <= 8)
+							return;
 						
 						if (samplesSeen == 0) {
 							lastTime = time;
@@ -151,9 +157,11 @@ public class RecordController extends Controller {
 								compressTotal += (time - lastTime);
 								lastTime = time;
 								samplesSeen++;
-								System.out.println(compressTotal / samplesSeen);
+								getFrameVideo().updateCompressionTime((int) (compressTotal / samplesSeen));
 							}
 						}
+						getFrameVideo().updateCompressedSize(size);
+						getFrameVideo().updateCompressionRatio(rawSize / (size + 0.0) );
 					}
 		        });
 
@@ -189,7 +197,7 @@ public class RecordController extends Controller {
                 	audioConverter.link(audioEnc, audioMux, audioFile);
                 	break;
                 default:
-                	audioConverter.link(audioMux, audioFile);
+                	audioConverter.link( audioFile);
                 	break;
                 }
                 

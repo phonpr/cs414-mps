@@ -1,5 +1,7 @@
 package org.cs414.mp2.server;
 
+import org.gstreamer.Gst;
+
 ////On ubuntu: sudo apt-get install libgstrtspserver-0.10-0 libgstrtspserver-0.10-dev
 //
 ////Play with VLC
@@ -108,7 +110,9 @@ public class Main {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-
+		Gst.init();
+		
+		System.out.println("Server starts...");
 	}
 
 }

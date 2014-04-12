@@ -1,5 +1,13 @@
 package org.cs414.mp2.client;
 
+import java.awt.event.ActionListener;
+
+import javax.swing.SwingUtilities;
+
+import org.cs414.mp2.client.controllers.Listener;
+import org.cs414.mp2.client.views.FrameVRemote;
+import org.gstreamer.Gst;
+
 ////Display RTSP streaming of video
 //// (c) 2011 enthusiasticgeek
 //// This code is distributed in the hope that it will be useful,
@@ -117,9 +125,30 @@ package org.cs414.mp2.client;
 
 public class Main {
 
+	
+	// frame
+	private static FrameVRemote frameVRemote = null;
+	
+	// listener
+	private static ActionListener remoteListener = null;
+	
+	/**
+	 * Launch the application.
+	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+		args = Gst.init("V-Remote", args);
+		
+		frameVRemote = new FrameVRemote();
+		frameVRemote.initializeComponents();
+		
+		remoteListener = new Listener(frameVRemote);
+		
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				frameVRemote.setVisible(true);
+				frameVRemote.initializeListener(remoteListener);
+			}
+		});
 	}
 
 }

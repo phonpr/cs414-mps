@@ -8,12 +8,15 @@ import javax.swing.JFileChooser;
 
 import org.cs414.mp2.client.controllers.Controller.AudioType;
 import org.cs414.mp2.client.controllers.Controller.VideoType;
+import org.cs414.mp2.client.controllers.network.ClientNetworkUtil;
+import org.cs414.mp2.client.controllers.network.ResourceNegotiation;
 import org.cs414.mp2.client.views.DialogRecordOptions;
 import org.cs414.mp2.client.views.FrameVRemote;
 
 public class Listener implements ActionListener {
-	
-	public static final String ACTION_PLAY = "play";
+
+	public static final String ACTION_START = "start";
+	public static final String ACTION_RESUME = "resume";
 	public static final String ACTION_RECORD = "record";
 	
 	public static final String ACTION_STOP = "stop";
@@ -38,66 +41,42 @@ public class Listener implements ActionListener {
 	public void actionPerformed(ActionEvent event) {
 		String action = event.getActionCommand();
 		
-		if (action == ACTION_PLAY) {
-			final JFileChooser fileChooser = new JFileChooser();
-			int nReturn = fileChooser.showOpenDialog(frameRemote);
-			if (nReturn == JFileChooser.APPROVE_OPTION) {
-				File file = fileChooser.getSelectedFile();
-				
-				frameRemote.setPlaying(file.getPath());
-				controller = new PlayController(file);
-				controller.startRunning();
+		if (action == ACTION_START) {
+			//controller = new PlayController(file);
+			controller.startRunning();
+			if(ResourceNegotiation.doAdmission()) {
+				ClientNetworkUtil.sendStart();
 			}
 		}
-		else if (action == ACTION_RECORD) {
-			dialogRecordOptions = new DialogRecordOptions(frameRemote);
-			dialogRecordOptions.showOpenDialog();
-			if (dialogRecordOptions.isStartRecording()) {
-				int width = dialogRecordOptions.getVideoWidth();
-				int height = dialogRecordOptions.getVideoHeight();
-				int frameRate = dialogRecordOptions.getFrameRate();
-				int samplingRate = dialogRecordOptions.getSamplingRate();
-				VideoType videoType = dialogRecordOptions.getVideoType();
-				AudioType audioType = dialogRecordOptions.getAudioType();
-				
-				final JFileChooser fileChooser = new JFileChooser();
-				int nReturn = fileChooser.showSaveDialog(frameRemote);
-				if (nReturn == JFileChooser.APPROVE_OPTION) {
-					File file = fileChooser.getSelectedFile();
-					
-					frameRemote.setRecording(file.getPath());
-					controller = new RecordController(
-						file, width, height, frameRate, samplingRate, videoType, audioType);
-					controller.startRunning();
-				}
-			}
+		else if(action == ACTION_RESUME) {
+
 		}
 		else if (action == ACTION_STOP) {
 			if (controller != null) {
 				controller.stopRunning();
+				ClientNetworkUtil.sendStop();
 				controller = null;
 			}
-			frameRemote.resetComponents();
 		}
 		else if (action == ACTION_PAUSE) {
 			// this is activated only when controller is PlayController
 			if (controller != null) {
 				((PlayController) controller).togglePause();
-				frameRemote.togglePause();
+				ClientNetworkUtil.sendPause();
 			}
 		}
 		else if (action == ACTION_FF) {
 			// this is activated only when controller is PlayController
 			if (controller != null) {
 				((PlayController) controller).toggleFF();
-				frameRemote.toggleFF();
+				ClientNetworkUtil.sendFF();
 			}
 		}
 		else if (action == ACTION_RW) {
 			// this is activated only when controller is PlayController
 			if (controller != null) {
 				((PlayController) controller).toggleRW();
-				frameRemote.toggleRW();
+				ClientNetworkUtil.sendRewind();
 			}
 		}
 		else ;

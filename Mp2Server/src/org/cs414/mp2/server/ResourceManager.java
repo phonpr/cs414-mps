@@ -25,6 +25,8 @@ public class ResourceManager {
 	}
 	
 	public static boolean isBandwidthAvailable(int bandwidth) {
+		System.out.println("Current Bandwidth : " + currentBandwidth + " / " + bandwidthLimit);
+		System.out.println("Requested : " + bandwidth);
 		return currentBandwidth + bandwidth <= bandwidthLimit;
 	}
 }

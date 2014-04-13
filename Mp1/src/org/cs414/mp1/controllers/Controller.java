@@ -47,11 +47,10 @@ public class Controller {
 	// audio components
 	private Pipeline audioPipe = null;
 	
-	public Controller(File file, OperationType operation) {
+	public Controller(OperationType operation) {
 		frameVideo = new FrameVideo(operation);
 		videoPipe = new Pipeline();
 		audioPipe = new Pipeline();
-		this.file = file;
 		
 		frameVideo.initializeComponents();
 	}

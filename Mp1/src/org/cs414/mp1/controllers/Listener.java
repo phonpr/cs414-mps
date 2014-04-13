@@ -39,15 +39,9 @@ public class Listener implements ActionListener {
 		String action = event.getActionCommand();
 		
 		if (action == ACTION_PLAY) {
-			final JFileChooser fileChooser = new JFileChooser();
-			int nReturn = fileChooser.showOpenDialog(frameRemote);
-			if (nReturn == JFileChooser.APPROVE_OPTION) {
-				File file = fileChooser.getSelectedFile();
-				
-				frameRemote.setPlaying(file.getPath());
-				controller = new PlayController(file);
+				frameRemote.setPlaying("temp");
+				controller = new PlayController();
 				controller.startRunning();
-			}
 		}
 		else if (action == ACTION_RECORD) {
 			dialogRecordOptions = new DialogRecordOptions(frameRemote);

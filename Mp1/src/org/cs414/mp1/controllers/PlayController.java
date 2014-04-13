@@ -1,13 +1,9 @@
 package org.cs414.mp1.controllers;
 
-import org.cs414.mp1.controllers.Controller.OperationType;
 import org.cs414.mp1.views.FrameVideo;
 import org.gstreamer.*;
-import org.gstreamer.elements.*;
+import org.gstreamer.elements.good.RTPBin;
 import org.gstreamer.swing.VideoComponent;
-
-import java.io.File;
-import java.util.List;
 
 import javax.swing.SwingUtilities;
 
@@ -24,8 +20,8 @@ public class PlayController extends Controller
 
 	private long lastTime = 0L;
 
-	public PlayController(File file) {
-		super(file, OperationType.PLAYING);
+	public PlayController() {
+		super(OperationType.PLAYING);
 	}
 
 	public void startRunning() {
@@ -36,118 +32,75 @@ public class PlayController extends Controller
 			@Override
 			public void run() {
 
-				//Detect whether or not it is a video file or an audio file
-				String[] fileNameSplit = getFile().getName().split("\\.");
-				String fileExtension = fileNameSplit[fileNameSplit.length - 1];
-
-				boolean audio = false;
-				if("pcm".equals(fileExtension) || "ogg".equals(fileExtension)) {
-					audio = true;
-				}
-
 
 				getFrameVideo().setVisible(true);
 				
-				final FileSrc fileSrc = new FileSrc("fileSrc");
-				fileSrc.setLocation(getFile());
-
-				//Element decodeBin = ElementFactory.make("decodebin2", null);
-				DecodeBin2 decodeBin = new DecodeBin2("bin");
-
-				Element appSinkQ = ElementFactory.make("queue", "appSinkQ");
-				AppSink appSink = (AppSink) ElementFactory.make("appsink", "appSink");
-				final Element tee = ElementFactory.make("tee", "tee");
-				Element videoQ = ElementFactory.make("queue", "videoQ");
-				Element audioSink = ElementFactory.make("autoaudiosink", "audioSink");
-
+				final Element vidrtpdepay = ElementFactory.make("rtpjpegdepay", "viddepay");
+				final Element audrtpdepay = ElementFactory.make("rtppcmadepay", "auddepay"); 
+				
+				Element viddecode = ElementFactory.make("jpegdec", "viddec");
+				Element colorspace = ElementFactory.make("ffmpegcolorspace", "colorspace");
+				
+				Element audConvert = ElementFactory.make("audioconvert", "audconvert");
+				Element audResample = ElementFactory.make("audioresample", "audresample");
+				Element audSink = ElementFactory.make("alsasink", "audsink");
+				
+				Element vidQ = ElementFactory.make("queue", "vidQ");
+				Element audQ = ElementFactory.make("queue", "audQ");
+				
+				Element vidUDPSrc = ElementFactory.make("udpsrc", "vidUDPsrc");
+				Element vidRTCPSink = ElementFactory.make("udpsink", "vidRTCPsink");
+				Element vidRTCPSrc = ElementFactory.make("udpsrc", "vidRTCPsrc");
+				
+				Element audUDPSrc = ElementFactory.make("udpsrc", "audUDPsrc");
+				Element audRTCPSink = ElementFactory.make("udpsink", "audRTCPsink");
+				Element audRTCPSrc = ElementFactory.make("udpsrc", "audRTCPsrc");
+				
+				vidUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)video, clock-rate=(int)90000"));
+				vidUDPSrc.set("port", 5000);
+				vidRTCPSrc.set("port", 5001);
+				vidRTCPSink.set("host", "127.0.0.1");
+				vidRTCPSink.set("port", 5005);
+				
+				audUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)audio, clock-rate=(int)8000"));
+				audUDPSrc.set("port", 5002);
+				audRTCPSrc.set("port", 5003);
+				audRTCPSink.set("host", "127.0.0.1");
+				audRTCPSink.set("port", 5007);
+				
 				final Element videoElement = videoComponent.getElement();
-
-
-				if(audio) {
-					getVideoPipe().addMany(fileSrc, decodeBin, appSinkQ, appSink, tee, videoQ, audioSink);
-					decodeBin.connect(new DecodeBin2.NEW_DECODED_PAD() {
-						public void newDecodedPad(DecodeBin2 element, Pad pad, boolean bool) {
-							element.link(tee);
+				
+				RTPBin rtp = new RTPBin("rtp");
+				
+				getVideoPipe().addMany(vidUDPSrc, vidRTCPSink, vidRTCPSrc, audUDPSrc, audRTCPSink, audRTCPSrc, rtp, vidrtpdepay, viddecode, colorspace, vidQ, videoElement, audrtpdepay, audConvert, audResample, audSink, audQ);
+				vidrtpdepay.link(viddecode, vidQ, colorspace, videoElement);
+				audrtpdepay.link(audConvert, audResample, audSink);
+				
+				rtp.connect(new Element.PAD_ADDED() {
+					public void padAdded(Element element, Pad pad) {
+						if (pad.getName().startsWith("recv_rtp_src_1")) {
+							System.out.println("audio added");
+							pad.link(audrtpdepay.getStaticPad("sink"));
 						}
-					});
-					fileSrc.link(decodeBin);
-					tee.link(appSinkQ, appSink);
-					tee.link(videoQ, audioSink);
-				}
-				else {
-					getVideoPipe().addMany(fileSrc, decodeBin, appSinkQ, appSink, tee, videoQ, videoElement);
-					decodeBin.connect(new DecodeBin2.NEW_DECODED_PAD() {
-						public void newDecodedPad(DecodeBin2 element, Pad pad, boolean bool) {
-							element.link(tee);
+						if (pad.getName().startsWith("recv_rtp_src_0")) {
+							System.out.println("video added");
+							pad.link(vidrtpdepay.getStaticPad("sink"));
 						}
-					});
-					fileSrc.link(decodeBin);
-					tee.link(appSinkQ, appSink);
-					tee.link(videoQ, videoComponent.getElement());
-				}
-				//--gst-debug-level=7
-
-				appSink.set("emit-signals", true);
-				appSink.setSync(false);
-				appSink.connect(new AppSink.NEW_BUFFER (){
-					@Override
-					public void newBuffer(AppSink arg0) {
-						Buffer temp = arg0.getLastBuffer();
-						long time = temp.getTimestamp().toMillis();
-
-						if(lastTime != 0L) {
-							System.out.println(time + " " + lastTime);
-							System.out.println(time - lastTime);
-							getFrameVideo().updateDecompressionTime((int)(time - lastTime));
-						}
-						lastTime = time;
 					}
 				});
+				
+				vidUDPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtp_sink_0"));
+				vidRTCPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtcp_sink_0"));
+				rtp.getRequestPad("send_rtcp_src_0").link(vidRTCPSink.getStaticPad("sink"));
+				
+				audUDPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtp_sink_1"));
+				audRTCPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtcp_sink_1"));
+				rtp.getRequestPad("send_rtcp_src_1").link(audRTCPSink.getStaticPad("sink"));
 
-
+				System.out.println(rtp.getPads());
+				
 				getVideoPipe().setState(State.PLAYING);
 
-
-				/*
-				//AVI playback
-				if("avi".equals(fileExtension)) {
-					final Element filter = ElementFactory.make("capsfilter", "filter");
-					filter.setCaps(Caps.fromString("image/jpeg, framerate=10/1"));
-
-					final Element parser = ElementFactory.make("jpegparse", "parser");
-					final Element decoder = ElementFactory.make("jpegdec", "decoder");
-
-					final Element colorSpace = ElementFactory.make("ffmpegcolorspace", null);
-
-					videoSink = videoComponent.getElement();
-
-					getVideoPipe().addMany(fileSrc, filter, parser, decoder, colorSpace, videoSink);
-					Element.linkMany(fileSrc, filter, parser, decoder,  colorSpace, videoSink);
-				}
-				else if("mp4".equals(fileExtension)) {
-
-					System.out.println("MP4");
-
-					final Element filter = ElementFactory.make("capsfilter", "filter");
-					filter.setCaps(Caps.fromString("video/mp4, framerate=10/1"));
-
-					final Element parser = ElementFactory.make("jpegparse", "parser");
-					final Element decoder = ElementFactory.make("ffdec_mpeg4", "decoder");
-
-					final Element colorSpace = ElementFactory.make("ffmpegcolorspace", null);
-
-					videoSink = videoComponent.getElement();
-
-					getVideoPipe().addMany(fileSrc, filter, decoder, colorSpace, videoSink);
-					Element.linkMany(fileSrc, filter, decoder, colorSpace, videoSink);
-				}
-				else if("pcm".equals(fileExtension)) {
-				}
-				else if("ogg".equals(fileExtension)) {
-				}
-				else {
-				}
-				*/
 			}
 		});
 	}

@@ -1,118 +1,90 @@
 package org.cs414.mp2.server;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+
 import org.gstreamer.Gst;
 
-////On ubuntu: sudo apt-get install libgstrtspserver-0.10-0 libgstrtspserver-0.10-dev
-//
-////Play with VLC
-////rtsp://localhost:8554/test
-//
-////video decode only:  gst-launch -v rtspsrc location="rtsp://localhost:8554/test" ! rtph264depay ! ffdec_h264 ! autovideosink
-////audio and video: 
-////gst-launch -v rtspsrc location="rtsp://localhost:8554/test" name=demux demux. ! queue ! rtph264depay ! ffdec_h264 ! ffmpegcolorspace ! autovideosink sync=false demux. ! queue ! rtppcmadepay  ! alawdec ! autoaudiosink
-//
-////###########################################################################
-//#include <gst/gst.h>
-//
-//#include <gst/rtsp-server/rtsp-server.h>
-//
-///* define this if you want the resource to only be available when using
-// * user/admin as the password */
-//#undef WITH_AUTH
-//
-///* this timeout is periodically run to clean up the expired sessions from the
-// * pool. This needs to be run explicitly currently but might be done
-// * automatically as part of the mainloop. */
-//static gboolean
-//timeout (GstRTSPServer * server, gboolean ignored)
-//{
-//  GstRTSPSessionPool *pool;
-//
-//  pool = gst_rtsp_server_get_session_pool (server);
-//  gst_rtsp_session_pool_cleanup (pool);
-//  g_object_unref (pool);
-//
-//  return TRUE;
-//}
-//
-//int
-//main (int argc, char *argv[])
-//{
-//  GMainLoop *loop;
-//  GstRTSPServer *server;
-//  GstRTSPMediaMapping *mapping;
-//  GstRTSPMediaFactory *factory;
-//#ifdef WITH_AUTH
-//  GstRTSPAuth *auth;
-//  gchar *basic;
-//#endif
-//
-//  gst_init (&argc, &argv);
-//
-//  loop = g_main_loop_new (NULL, FALSE);
-//
-//  /* create a server instance */
-//  server = gst_rtsp_server_new ();
-//  gst_rtsp_server_set_service(server,"8554"); //set the port #
-//
-//  /* get the mapping for this server, every server has a default mapper object
-//   * that be used to map uri mount points to media factories */
-//  mapping = gst_rtsp_server_get_media_mapping (server);
-//
-//#ifdef WITH_AUTH
-//  /* make a new authentication manager. it can be added to control access to all
-//   * the factories on the server or on individual factories. */
-//  auth = gst_rtsp_auth_new ();
-//  basic = gst_rtsp_auth_make_basic ("user", "admin");
-//  gst_rtsp_auth_set_basic (auth, basic);
-//  g_free (basic);
-//  /* configure in the server */
-//  gst_rtsp_server_set_auth (server, auth);
-//#endif
-//
-//  /* make a media factory for a test stream. The default media factory can use
-//   * gst-launch syntax to create pipelines.
-//   * any launch line works as long as it contains elements named pay%d. Each
-//   * element with pay%d names will be a stream */
-//  factory = gst_rtsp_media_factory_new ();
-//
-//  gst_rtsp_media_factory_set_launch (factory, "( "
-//      "videotestsrc ! video/x-raw-yuv,width=320,height=240,framerate=10/1 ! "
-//      "x264enc ! queue ! rtph264pay name=pay0 pt=96 ! audiotestsrc ! audio/x-raw-int,rate=8000 ! alawenc ! rtppcmapay name=pay1 pt=97 "")");
-//
-//  /* attach the test factory to the /test url */
-//  gst_rtsp_media_mapping_add_factory (mapping, "/test", factory);
-//
-//  /* don't need the ref to the mapper anymore */
-//  g_object_unref (mapping);
-//
-//  /* attach the server to the default maincontext */
-//  if (gst_rtsp_server_attach (server, NULL) == 0)
-//    goto failed;
-//
-//  /* add a timeout for the session cleanup */
-//  g_timeout_add_seconds (2, (GSourceFunc) timeout, server);
-//
-//  /* start serving, this never stops */
-//  g_main_loop_run (loop);
-//
-//  return 0;
-//
-//  /* ERRORS */
-//failed:
-//  {
-//    g_print ("failed to attach the server\n");
-//    return -1;
-//  }
-//}
-
 public class Main {
-
+	
+	private static final int SERVER_PORT = 5000;
+	private static final int UDPSINK_PORT = 5001;
+	
+	private static boolean serverRunning = true;
+	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		Gst.init();
 		
-		System.out.println("Server starts...");
+		System.out.println("Starting server...");
+		
+		int bandwidthLimit = 0;
+		try {
+			bandwidthLimit = Integer.parseInt(readFile("resource.txt"));
+		}
+		catch (Exception e) {}
+		finally {
+			System.out.println("Bandwidth Capacity : " + bandwidthLimit);
+			ResourceManager.setBandwidthLimit(bandwidthLimit);
+		}
+		
+		startServer();
+	}
+
+	private static void startServer() {
+		ServerSocket listenerSocket = null;
+		
+		try {
+			listenerSocket = new ServerSocket();
+			listenerSocket.setReuseAddress(true);
+			listenerSocket.bind(new InetSocketAddress(SERVER_PORT));
+			
+			while (serverRunning) {
+				final Socket socket = listenerSocket.accept();
+				
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						System.out.println("Client Connected!");
+						
+						// control channel
+						new Thread(new ControlChannel(socket)).start();
+					}
+				}).start();
+			}
+			
+		} catch (IOException e) {
+			System.out.println("[ERROR] Failed to initialize server socket.");
+			System.out.println(e);
+		}
+	}
+	
+	private static String readFile(String file) {
+		String value = "";
+		
+		try {
+			FileInputStream fileStream = new FileInputStream(file);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(fileStream));
+			
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				value += line;
+			}
+			
+			fileStream.close();
+			reader.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return value;
 	}
 
 }

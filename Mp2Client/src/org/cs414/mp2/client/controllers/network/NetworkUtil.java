@@ -12,7 +12,7 @@ public class NetworkUtil {
 	protected Socket socket;
 	protected LinkedBlockingQueue<String> messageQueue;
 
-	protected Writer writer;
+	protected PrintWriter writer;
 	protected BufferedReader reader;
 
 	private Runnable messageListener;
@@ -25,12 +25,20 @@ public class NetworkUtil {
 		}
 
 		public void run() {
-			while(exit = false) {
+			while(exit == false) {
 				try {
-					if(reader.ready()) {
-						messageQueue.offer(reader.readLine());
+					while(reader.ready()) {
+						String lineRead = reader.readLine();
+						System.out.println(lineRead);
+						messageQueue.offer(lineRead);
 					}
 				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
@@ -45,19 +53,15 @@ public class NetworkUtil {
 			messageQueue = new LinkedBlockingQueue();
 
 			messageListener = new ReadCommandsListener();
-			messageListener.run();
+			new Thread(messageListener).start();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void sendMessage(String command) {
-		try {
-			writer.write(command);
-			writer.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		writer.println(command);
+		writer.flush();
 	}
 
 	public String readMessage() {

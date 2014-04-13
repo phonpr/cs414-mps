@@ -9,25 +9,34 @@ import java.io.IOException;
  * Created by bill on 4/12/14.
  */
 public class ResourceNegotiation {
+	private static int available = getAvailableFromFile();
+
 	public static boolean doAdmission() {
-		try {
-			if (getAvailable() >= getRequired()) {
-				return true;
-			}
-		}
-		catch(IOException e) {
-			return false;
+		if (getAvailable() >= getRequired()) {
+			return true;
 		}
 
 		return false;
 	}
 
-	private static int getAvailable() throws IOException {
-		File resourceFile = new File("resource.txt");
-		BufferedReader reader = new BufferedReader(new FileReader(resourceFile));
+	public static void setAvailable(int newMax) {
+		available = newMax;
+	}
 
-		int available = Integer.parseInt(reader.readLine());
+	public static int getAvailable() {
+		return available;
+	}
 
+	private static int getAvailableFromFile() {
+		try {
+			File resourceFile = new File("resource.txt");
+			BufferedReader reader = new BufferedReader(new FileReader(resourceFile));
+			String nextLine = reader.readLine();
+			System.out.println(nextLine);
+			available = Integer.parseInt(nextLine);
+		}
+		catch(IOException e) {
+		}
 		return available;
 	}
 
@@ -37,6 +46,7 @@ public class ResourceNegotiation {
 	}
 
 	public static boolean doNegotiation() {
+
 		return false;
 	}
 }

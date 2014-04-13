@@ -34,6 +34,8 @@ public class FrameVRemote extends JFrame {
 	private static final String BUTTON_PAUSE = "Pause";
 	private static final String BUTTON_FF = "FF";
 	private static final String BUTTON_RW = "RW";
+
+	private static final String BUTTON_BAND = "Band";
 	//private static final String LABEL_FILE = "File";
 
 	// UI components
@@ -48,6 +50,8 @@ public class FrameVRemote extends JFrame {
 	private JButton btnPause = null;
 	private JButton btnFF = null;
 	private JButton btnRW = null;
+
+	private JButton btnBand = null;
 	
 	private JTextField textFilePath = null;
 
@@ -88,25 +92,27 @@ public class FrameVRemote extends JFrame {
 		panelControl.add(btnPause);
 		panelControl.add(btnFF);
 		panelControl.add(btnRW);
-		
+
+
 		// File Panel
-		/*
-		JLabel labelFile = new JLabel(LABEL_FILE);
-		textFilePath = new JTextField();
-		panelFile.add(labelFile);
-		panelFile.add(textFilePath);
-		textFilePath.setColumns(28);
-		textFilePath.setEditable(false);
-		*/
+
+		JLabel labelBandwidth = new JLabel("Bandwidth");
+		btnBand = new JButton(BUTTON_BAND);
+		panelFile.add(btnBand);
+
 
 		// initial disables
+		/*
 		enableCommonControllers(false);
 		enablePlayControllers(false);
+		*/
 	}
 	
 	public void initializeListener(ActionListener listener) {
 		
 		// PlayRecordPanel listener
+		btnStart.addActionListener(listener);
+		btnStart.setActionCommand(Listener.ACTION_START);
 		btnResume.addActionListener(listener);
 		btnResume.setActionCommand(Listener.ACTION_RESUME);
 		//btnRecord.addActionListener(listener);
@@ -121,6 +127,10 @@ public class FrameVRemote extends JFrame {
 		btnFF.setActionCommand(Listener.ACTION_FF);
 		btnRW.addActionListener(listener);
 		btnRW.setActionCommand(Listener.ACTION_RW);
+
+
+		btnBand.addActionListener(listener);
+		btnBand.setActionCommand(Listener.ACTION_SETBAND);
 	}
 	
 	public void enablePlayRecord(boolean enable) {

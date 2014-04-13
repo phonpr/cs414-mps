@@ -7,10 +7,25 @@ import java.net.Socket;
  */
 public class ClientNetworkUtil{
 
-	public static NetworkUtil clientNetworkUtil = new NetworkUtil("localhost", 5000);
+	public static NetworkUtil clientNetworkUtil = new NetworkUtil("192.168.1.4", 5000);
 
-	public static void sendStart() {
-		clientNetworkUtil.sendMessage(NetworkConstants.START_CMD);
+	public static void sendStart(int requestedResource) {
+		clientNetworkUtil.sendMessage(NetworkConstants.START_CMD + requestedResource);
+	}
+
+	public static String waitForGoMessage() {
+		String nextMessage = clientNetworkUtil.readMessage();
+
+		while(nextMessage == null) {
+			nextMessage = clientNetworkUtil.readMessage();
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return nextMessage;
 	}
 
 	public static void sendStop() {

@@ -27,21 +27,23 @@ public class FrameVRemote extends JFrame {
 	private static final int FRAME_WIDTH = 400;
 	private static final int FRAME_HEIGHT = 150;
 	
-	private static final String BUTTON_PLAY = "Play";
+	private static final String BUTTON_START = "Start";
+	private static final String BUTTON_RESUME = "Resume";
 	private static final String BUTTON_RECORD = "Record";
 	private static final String BUTTON_STOP = "Stop";
 	private static final String BUTTON_PAUSE = "Pause";
 	private static final String BUTTON_FF = "FF";
 	private static final String BUTTON_RW = "RW";
-	private static final String LABEL_FILE = "File";
+	//private static final String LABEL_FILE = "File";
 
 	// UI components
 	private JPanel panelPlayRecord = null;
 	private JPanel panelControl = null;
 	private JPanel panelFile = null;
-	
-	private JButton btnPlay = null;
-	private JButton btnRecord = null;
+
+	private JButton btnStart = null;
+	private JButton btnResume = null;
+	//private JButton btnRecord = null;
 	private JButton btnStop = null;
 	private JButton btnPause = null;
 	private JButton btnFF = null;
@@ -70,11 +72,13 @@ public class FrameVRemote extends JFrame {
 		getContentPane().add(panelFile);
 		
 		// PlayRecord Panel
-		btnPlay = new JButton(BUTTON_PLAY);
-		btnRecord = new JButton(BUTTON_RECORD);
+		btnStart = new JButton(BUTTON_START);
+		btnResume = new JButton(BUTTON_RESUME);
+		//btnRecord = new JButton(BUTTON_RECORD);
 		btnStop = new JButton(BUTTON_STOP);
-		panelPlayRecord.add(btnPlay);
-		panelPlayRecord.add(btnRecord);
+		panelPlayRecord.add(btnStart);
+		panelPlayRecord.add(btnResume);
+		//panelPlayRecord.add(btnRecord);
 		panelPlayRecord.add(btnStop);
 		
 		// Control Panel
@@ -86,13 +90,15 @@ public class FrameVRemote extends JFrame {
 		panelControl.add(btnRW);
 		
 		// File Panel
+		/*
 		JLabel labelFile = new JLabel(LABEL_FILE);
 		textFilePath = new JTextField();
 		panelFile.add(labelFile);
 		panelFile.add(textFilePath);
 		textFilePath.setColumns(28);
 		textFilePath.setEditable(false);
-		
+		*/
+
 		// initial disables
 		enableCommonControllers(false);
 		enablePlayControllers(false);
@@ -101,10 +107,10 @@ public class FrameVRemote extends JFrame {
 	public void initializeListener(ActionListener listener) {
 		
 		// PlayRecordPanel listener
-		btnPlay.addActionListener(listener);
-		btnPlay.setActionCommand(Listener.ACTION_PLAY);
-		btnRecord.addActionListener(listener);
-		btnRecord.setActionCommand(Listener.ACTION_RECORD);
+		btnResume.addActionListener(listener);
+		btnResume.setActionCommand(Listener.ACTION_RESUME);
+		//btnRecord.addActionListener(listener);
+		//btnRecord.setActionCommand(Listener.ACTION_RECORD);
 		btnStop.addActionListener(listener);
 		btnStop.setActionCommand(Listener.ACTION_STOP);
 		
@@ -118,8 +124,7 @@ public class FrameVRemote extends JFrame {
 	}
 	
 	public void enablePlayRecord(boolean enable) {
-		btnPlay.setEnabled(enable);
-		btnRecord.setEnabled(enable);
+		btnStart.setEnabled(enable);
 	}
 	
 	public void enableCommonControllers(boolean enable) {
@@ -127,6 +132,7 @@ public class FrameVRemote extends JFrame {
 	}
 	
 	public void enablePlayControllers(boolean enable) {
+		btnResume.setEnabled(enable);
 		btnPause.setEnabled(enable);
 		btnFF.setEnabled(enable);
 		btnRW.setEnabled(enable);

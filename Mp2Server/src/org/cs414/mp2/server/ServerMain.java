@@ -11,7 +11,7 @@ import java.net.Socket;
 
 import org.gstreamer.Gst;
 
-public class Main {
+public class ServerMain {
 	
 	private static final int SERVER_PORT = 7000;
 	private static final int UDPSINK_PORT = 5001;

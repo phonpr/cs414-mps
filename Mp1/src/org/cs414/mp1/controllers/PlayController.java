@@ -13,15 +13,6 @@ import javax.swing.SwingUtilities;
 
 public class PlayController extends Controller
 {
-	
-	private enum PlayType {
-		NORMAL	,
-		FF		,
-		RW		,
-	}
-	
-	private PlayType ePlayType = PlayType.NORMAL;
-
 	private long lastTime = 0L;
 
 	public PlayController(File file) {
@@ -150,63 +141,5 @@ public class PlayController extends Controller
 				*/
 			}
 		});
-	}
-	
-	public void togglePause() {
-		if (getVideoPipe().getState() == State.PAUSED) {
-			// when resuming pased, set to normal playing
-			ePlayType = PlayType.NORMAL;
-			setNewRate(1.0);
-			getVideoPipe().setState(State.PLAYING);
-		}
-		else {
-			getVideoPipe().setState(State.PAUSED);
-		}
-	}
-	
-	public void toggleFF()
-	{
-		if (ePlayType == PlayType.FF) {
-			ePlayType = PlayType.NORMAL;
-			setNewRate(1.0);
-		}
-		else {
-			// case NORMAL or RW
-			ePlayType = PlayType.FF;
-			setNewRate(2.0);
-		}
-	}
-
-	public void toggleRW() {
-		if (ePlayType == PlayType.RW) {
-			ePlayType = PlayType.NORMAL;
-			setNewRate(1.0);
-		}
-		else {
-			// case NORMAL or FF
-			ePlayType = PlayType.RW;
-			setNewRate(-1.0);
-		}
-	}
-
-	/**
-	 * Sets the rate of the playback to the specified rate
-	 */
-	private void setNewRate(double newRate) {
-
-		System.out.println("SETTING NEW RATE: " + newRate);
-
-		getVideoPipe().setState(State.PAUSED);
-		long currentTime = getVideoPipe().queryPosition(Format.TIME);
-		System.out.println(currentTime);
-		getVideoPipe().setState(State.PLAYING);
-
-		if(newRate >= 0.0) {
-			getVideoPipe().seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, currentTime, SeekType.NONE, -1);
-		}
-		else {
-			getVideoPipe().seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, 0, SeekType.SET, currentTime);
-		}
-
 	}
 }

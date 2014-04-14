@@ -79,21 +79,18 @@ public class Listener implements ActionListener {
 		else if (action == ACTION_PAUSE) {
 			// this is activated only when controller is PlayController
 			if (controller != null) {
-				((PlayController) controller).togglePause();
 				ClientNetworkUtil.sendPause();
 			}
 		}
 		else if (action == ACTION_FF) {
 			// this is activated only when controller is PlayController
 			if (controller != null) {
-				((PlayController) controller).toggleFF();
 				ClientNetworkUtil.sendFF();
 			}
 		}
 		else if (action == ACTION_RW) {
 			// this is activated only when controller is PlayController
 			if (controller != null) {
-				((PlayController) controller).toggleRW();
 				ClientNetworkUtil.sendRewind();
 			}
 		}

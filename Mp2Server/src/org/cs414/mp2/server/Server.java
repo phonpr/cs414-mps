@@ -16,11 +16,19 @@ import java.util.List;
 
 public class Server {
 
-	Pipeline pipe;
+	private Pipeline pipe;
+
+	private enum PlayType {
+		NORMAL	,
+		FF		,
+		RW		,
+	}
+
+	private PlayType ePlayType = PlayType.NORMAL;
 
 	public void createPipeline() {
 		FileSrc fileSrc = (FileSrc) ElementFactory.make("filesrc", "filesrc");
-		fileSrc.setLocation(new File("testvideo5.avi") );
+		fileSrc.setLocation(new File("testvideo.avi") );
 
 		Element demux = ElementFactory.make("avidemux", "demux");
 
@@ -41,19 +49,19 @@ public class Server {
 		Element vidUDPSink = ElementFactory.make("udpsink", "vidudpsink");
 		Element vidRTCPSrc = ElementFactory.make("udpsrc", "vidrtcpsrc");
 		Element vidRTCPSink = ElementFactory.make("udpsink", "vidrtcpsink");
-		vidUDPSink.set("host", "localhost");
+		vidUDPSink.set("host", "172.16.206.138");
 		vidUDPSink.set("port", 5000);
 		vidRTCPSrc.set("port", 5005);
-		vidRTCPSink.set("host", "localhost");
+		vidRTCPSink.set("host", "172.16.206.138");
 		vidRTCPSink.set("port", 5001);
 
 		Element audUDPSink = ElementFactory.make("udpsink", "aududpsink");
 		Element audRTCPSrc = ElementFactory.make("udpsrc", "audrtcpsrc");
 		Element audRTCPSink = ElementFactory.make("udpsink", "audrtcpsink");
-		audUDPSink.set("host", "localhost");
+		audUDPSink.set("host", "172.16.206.138");
 		audUDPSink.set("port", 5002);
 		audRTCPSrc.set("port", 5007);
-		audRTCPSink.set("host", "localhost");
+		audRTCPSink.set("host", "172.16.206.138");
 		audRTCPSink.set("port", 5003);
 
 		pipe = new Pipeline();
@@ -90,34 +98,69 @@ public class Server {
 		vidRTCPSink.set("sync", false); vidRTCPSink.set("async", false);
 
 		System.out.println(rtp.getPads());
-
-	}
-
-	public static String getCaps(Element elem) {
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		List<Pad> pads = elem.getPads();
-
-		for (Pad pad : pads) {
-
-			if (pad.getDirection() == PadDirection.SINK) {
-				Pad peer = pad.getPeer();
-				Caps cap = peer.getNegotiatedCaps();
-				String capString = cap.toString();
-				System.out.println("sent " + capString);
-				return capString;
-
-			}
-		}
-		return null;
 	}
 
 	public void play() {
 		pipe.setState(State.READY);
 		pipe.setState(State.PLAYING);
+	}
+
+	public void togglePause() {
+		if (pipe.getState() == State.PAUSED) {
+			// when resuming pased, set to normal playing
+			ePlayType = PlayType.NORMAL;
+			setNewRate(1.0);
+			pipe.setState(State.PLAYING);
+		}
+		else {
+			pipe.setState(State.PAUSED);
+		}
+	}
+
+	public void toggleFF()
+	{
+		if (ePlayType == PlayType.FF) {
+			ePlayType = PlayType.NORMAL;
+			setNewRate(1.0);
+		}
+		else {
+			// case NORMAL or RW
+			ePlayType = PlayType.FF;
+			setNewRate(2.0);
+		}
+	}
+
+	public void toggleRW() {
+		if (ePlayType == PlayType.RW) {
+			ePlayType = PlayType.NORMAL;
+			setNewRate(1.0);
+		}
+		else {
+			// case NORMAL or FF
+			ePlayType = PlayType.RW;
+			setNewRate(-1.0);
+		}
+	}
+
+	/**
+	 * Sets the rate of the playback to the specified rate
+	 */
+	private void setNewRate(double newRate) {
+
+		System.out.println("SETTING NEW RATE: " + newRate);
+
+		pipe.setState(State.PAUSED);
+		long currentTime = pipe.queryPosition(Format.TIME);
+		System.out.println(currentTime);
+		pipe.setState(State.PLAYING);
+
+		if(newRate >= 0.0) {
+			pipe.seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, currentTime, SeekType.NONE, -1);
+		}
+		else {
+			pipe.seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, 0, SeekType.SET, currentTime);
+		}
+
 	}
 }
 

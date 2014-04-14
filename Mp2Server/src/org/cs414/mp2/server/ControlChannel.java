@@ -51,11 +51,7 @@ public class ControlChannel implements Runnable {
 						if (ResourceManager.isBandwidthAvailable(bandwidth)) {
 							ResourceManager.addBandwidth(bandwidth);
 
-							//new Thread(mediaThread).start();
-							Server server = new Server();
-							server.createPipeline();
-
-							server.play();
+							new Thread(mediaThread).start();
 
 							writer.println("TRUE");
 						}

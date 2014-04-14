@@ -54,7 +54,7 @@ public class ControlChannel implements Runnable {
 						bandwidth = Integer.parseInt(paramSplit[0]);
 						int size = Integer.parseInt(paramSplit[1]);
 						
-						bandwidth = Math.max(bandwidth, ResourceManager.getCurrentBandwidth());
+						bandwidth = Math.min(bandwidth, ResourceManager.getBandwidthLimit() - ResourceManager.getCurrentBandwidth());
 						int framerate = calcFramerate(bandwidth, size);
 						
 						if (framerate == -1) {

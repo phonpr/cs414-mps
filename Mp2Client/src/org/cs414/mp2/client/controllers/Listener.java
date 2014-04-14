@@ -54,7 +54,7 @@ public class Listener implements ActionListener {
 		
 		if (action == ACTION_START) {
 			if(ResourceNegotiation.doAdmission(frameRemote.getVideoSelection())) { //TODO UNCOMMENT
-				String hostname = "localhost";
+				String hostname = "172.16.229.1";
 
 				controller = new PlayController();
 				controller.setHostname(hostname);

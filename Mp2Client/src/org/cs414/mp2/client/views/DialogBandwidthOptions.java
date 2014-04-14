@@ -62,8 +62,8 @@ public class DialogBandwidthOptions extends JDialog {
 	public void initializeListener(ActionListener listener) {
 		btnSet.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(!"".equals(bandwidthInput)) {
-					maxBandwidth = Integer.parseInt(bandwidthInput.getText());
+				if(!"".equals(bandwidthInput.getText())) {
+					maxBandwidth = Integer.valueOf(bandwidthInput.getText());
 					changed = true;
 					dispose();
 				}

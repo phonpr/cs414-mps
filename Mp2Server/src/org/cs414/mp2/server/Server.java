@@ -3,7 +3,6 @@ package org.cs414.mp2.server;
 /**
 * Created by bill on 4/13/14.
 */
-import org.gstreamer.Gst;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
@@ -13,7 +12,6 @@ import org.gstreamer.*;
 import org.gstreamer.elements.good.RTPBin;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 public class Server {
@@ -29,6 +27,12 @@ public class Server {
 		final Element vidQ = ElementFactory.make("queue", "vidQ");
 		final Element audQ = ElementFactory.make("queue", "audQ");
 
+		Element vidDec = ElementFactory.make("jpegdec", "stupiddec");
+		Element vidRate = ElementFactory.make("videorate", "ratechange");
+		Element vidEnc = ElementFactory.make("jpegenc", "stupidenc");
+		
+		vidRate.set("max-rate", 10);
+				
 		Element vidrtppay = ElementFactory.make("rtpjpegpay", "vidpay");
 		Element audrtppay = ElementFactory.make("rtppcmapay", "audpay");
 
@@ -54,7 +58,7 @@ public class Server {
 
 		pipe = new Pipeline();
 
-		pipe.addMany(fileSrc, demux, vidQ, audQ, vidrtppay, audrtppay, rtp, vidUDPSink, vidRTCPSink, vidRTCPSrc, audUDPSink, audRTCPSink, audRTCPSrc);
+		pipe.addMany(vidDec, vidRate, vidEnc, fileSrc, demux, vidQ, audQ, vidrtppay, audrtppay, rtp, vidUDPSink, vidRTCPSink, vidRTCPSrc, audUDPSink, audRTCPSink, audRTCPSrc);
 		fileSrc.link(demux);
 		demux.connect(new Element.PAD_ADDED() {
 			public void padAdded(Element element, Pad pad) {
@@ -69,7 +73,7 @@ public class Server {
 			}
 		});
 
-		vidQ.link(vidrtppay);
+		vidQ.link(vidDec, vidRate, vidEnc, vidrtppay);
 		audQ.link(audrtppay);
 
 		vidrtppay.getStaticPad("src").link(rtp.getRequestPad("send_rtp_sink_0")); // Link vid to rtp
@@ -87,13 +91,6 @@ public class Server {
 
 		System.out.println(rtp.getPads());
 
-		try {
-			System.in.read();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		getCaps( audUDPSink);
 	}
 
 	public static String getCaps(Element elem) {

@@ -18,8 +18,6 @@ public class PlayController extends Controller
 	
 	private PlayType ePlayType = PlayType.NORMAL;
 
-	private long lastTime = 0L;
-
 	public PlayController() {
 		super(OperationType.PLAYING);
 	}
@@ -41,6 +39,7 @@ public class PlayController extends Controller
 				Element viddecode = ElementFactory.make("jpegdec", "viddec");
 				Element colorspace = ElementFactory.make("ffmpegcolorspace", "colorspace");
 				
+				Element audDec = ElementFactory.make("alawdec", "auddec");
 				Element audConvert = ElementFactory.make("audioconvert", "audconvert");
 				Element audResample = ElementFactory.make("audioresample", "audresample");
 				Element audSink = ElementFactory.make("alsasink", "audsink");
@@ -56,28 +55,29 @@ public class PlayController extends Controller
 				Element audRTCPSink = ElementFactory.make("udpsink", "audRTCPsink");
 				Element audRTCPSrc = ElementFactory.make("udpsrc", "audRTCPsrc");
 				
-				vidUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)video, clock-rate=(int)90000"));
+				vidUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)JPEG, ssrc=(uint)2934514725, payload=(int)96, clock-base=(uint)2718573098, seqnum-base=(uint)11320"));
 				vidUDPSrc.set("port", 5000);
 				vidRTCPSrc.set("port", 5001);
-				vidRTCPSink.set("host", "127.0.0.1");
+				vidRTCPSink.set("host", "localhost");
 				vidRTCPSink.set("port", 5005);
 				
-				audUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)audio, clock-rate=(int)8000"));
+				audUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)audio, clock-rate=(int)8000, encoding-name=(string)PCMA, ssrc=(uint)3824386182, payload=(int)8, clock-base=(uint)921092443, seqnum-base=(uint)8008"));
 				audUDPSrc.set("port", 5002);
 				audRTCPSrc.set("port", 5003);
-				audRTCPSink.set("host", "127.0.0.1");
+				audRTCPSink.set("host", "localhost");
 				audRTCPSink.set("port", 5007);
 				
 				final Element videoElement = videoComponent.getElement();
 				
 				RTPBin rtp = new RTPBin("rtp");
 				
-				getVideoPipe().addMany(vidUDPSrc, vidRTCPSink, vidRTCPSrc, audUDPSrc, audRTCPSink, audRTCPSrc, rtp, vidrtpdepay, viddecode, colorspace, vidQ, videoElement, audrtpdepay, audConvert, audResample, audSink, audQ);
+				getVideoPipe().addMany(vidUDPSrc, vidRTCPSink, vidRTCPSrc, audUDPSrc, audRTCPSink, audRTCPSrc, rtp, audDec, vidrtpdepay, viddecode, colorspace, vidQ, videoElement, audrtpdepay, audConvert, audResample, audSink, audQ);
 				vidrtpdepay.link(viddecode, vidQ, colorspace, videoElement);
-				audrtpdepay.link(audConvert, audResample, audSink);
+				audrtpdepay.link(audDec, audConvert, audResample, audSink);
 				
 				rtp.connect(new Element.PAD_ADDED() {
 					public void padAdded(Element element, Pad pad) {
+						System.out.println("pad added");
 						if (pad.getName().startsWith("recv_rtp_src_1")) {
 							System.out.println("audio added");
 							pad.link(audrtpdepay.getStaticPad("sink"));
@@ -96,9 +96,14 @@ public class PlayController extends Controller
 				audUDPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtp_sink_1"));
 				audRTCPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtcp_sink_1"));
 				rtp.getRequestPad("send_rtcp_src_1").link(audRTCPSink.getStaticPad("sink"));
+				
+				audRTCPSink.set("sync", false); audRTCPSink.set("async", false);
+				vidRTCPSink.set("sync", false); vidRTCPSink.set("async", false);
 
+				System.out.println(rtp.getSources());
 				System.out.println(rtp.getPads());
 				
+				getVideoPipe().setState(State.READY);
 				getVideoPipe().setState(State.PLAYING);
 
 			}

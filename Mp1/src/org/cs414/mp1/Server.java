@@ -3,33 +3,27 @@ package org.cs414.mp1;
 import org.gstreamer.Gst;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
+import org.gstreamer.Pad;
+import org.gstreamer.PadDirection;
 import org.gstreamer.elements.*;
 import org.gstreamer.*;
 import org.gstreamer.elements.good.RTPBin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class Server {
 
-	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
 		Gst.init("testserver", args);
 		FileSrc fileSrc = (FileSrc) ElementFactory.make("filesrc", "filesrc");
-		fileSrc.setLocation(new File("video.avi") );
+		fileSrc.setLocation(new File("testvideo3.avi") );
 		
 		Element demux = ElementFactory.make("avidemux", "demux");
 		
-		final DecodeBin2 viddecbin = new DecodeBin2("bin");
-		
 		final Element vidQ = ElementFactory.make("queue", "vidQ");
 		final Element audQ = ElementFactory.make("queue", "audQ");
-		
-		Element colorspace = ElementFactory.make("ffmpegcolorspace", "colorspace");
-		
-		Element vidvariablerate = ElementFactory.make("videorate", "rate");
-		
-		Element videncode = ElementFactory.make("jpegenc", "enc");
 		
 		Element vidrtppay = ElementFactory.make("rtpjpegpay", "vidpay");
 		Element audrtppay = ElementFactory.make("rtppcmapay", "audpay");
@@ -39,46 +33,39 @@ public class Server {
 		Element vidUDPSink = ElementFactory.make("udpsink", "vidudpsink");
 		Element vidRTCPSrc = ElementFactory.make("udpsrc", "vidrtcpsrc");
 		Element vidRTCPSink = ElementFactory.make("udpsink", "vidrtcpsink");
-		vidUDPSink.set("host", "127.0.0.1");
+		vidUDPSink.set("host", "localhost");
 		vidUDPSink.set("port", 5000);
 		vidRTCPSrc.set("port", 5005);
-		vidRTCPSink.set("host", "127.0.0.1");
+		vidRTCPSink.set("host", "localhost");
 		vidRTCPSink.set("port", 5001);
 		
 		Element audUDPSink = ElementFactory.make("udpsink", "aududpsink");
 		Element audRTCPSrc = ElementFactory.make("udpsrc", "audrtcpsrc");
 		Element audRTCPSink = ElementFactory.make("udpsink", "audrtcpsink");
-		audUDPSink.set("host", "127.0.0.1");
+		audUDPSink.set("host", "localhost");
 		audUDPSink.set("port", 5002);
 		audRTCPSrc.set("port", 5007);
-		audRTCPSink.set("host", "127.0.0.1");
+		audRTCPSink.set("host", "localhost");
 		audRTCPSink.set("port", 5003);
 		
 		Pipeline pipe = new Pipeline();
 		
-		pipe.addMany(fileSrc, demux, viddecbin, vidQ, audQ, colorspace, vidvariablerate, videncode, vidrtppay, audrtppay, rtp, vidUDPSink, vidRTCPSink, vidRTCPSrc, audUDPSink, audRTCPSink, audRTCPSrc);
+		pipe.addMany(fileSrc, demux, vidQ, audQ, vidrtppay, audrtppay, rtp, vidUDPSink, vidRTCPSink, vidRTCPSrc, audUDPSink, audRTCPSink, audRTCPSrc);
 		fileSrc.link(demux);
 		demux.connect(new Element.PAD_ADDED() {
             public void padAdded(Element element, Pad pad) {
                 if (pad.getName().startsWith("audio_")) {
-                        System.out.println("audio pad found");
-                        Pad spad = audQ.getStaticPad("sink");
+                	System.out.println("audio pad found");
+                	pad.link(audQ.getStaticPad("sink"));
                 }
                 if (pad.getName().startsWith("video_")) {
-                        System.out.println("video pad found");
-                        Pad spad = viddecbin.getStaticPad("sink");
-                    pad.link(spad);
-                    
+                	System.out.println("video pad found");
+                	pad.link(vidQ.getStaticPad("sink"));
                 }
             }
         }); 
-		viddecbin.connect(new DecodeBin2.NEW_DECODED_PAD() {
-			public void newDecodedPad(DecodeBin2 element, Pad pad, boolean bool) {
-				element.link(vidQ);
-			}
-		});
 		
-		vidQ.link(colorspace, vidvariablerate, videncode, vidrtppay);
+		vidQ.link(vidrtppay);
 		audQ.link(audrtppay);
 		
 		vidrtppay.getStaticPad("src").link(rtp.getRequestPad("send_rtp_sink_0")); // Link vid to rtp
@@ -91,6 +78,9 @@ public class Server {
 		rtp.getRequestPad("send_rtcp_src_1").link(audRTCPSink.getStaticPad("sink")); // Link rtcp to udp
 		audRTCPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtcp_sink_1")); // Link udp to rtcp
 		
+		audRTCPSink.set("sync", false); audRTCPSink.set("async", false);
+		vidRTCPSink.set("sync", false); vidRTCPSink.set("async", false);
+		
 		System.out.println(rtp.getPads());
 		
 		pipe.setState(State.READY);
@@ -98,9 +88,34 @@ public class Server {
 		try {
 			System.in.read();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		getCaps( audUDPSink);
 	}
+	
+	public static String getCaps(Element elem) {
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		List<Pad> pads = elem.getPads();
+
+		for (Pad pad : pads) {
+
+			if (pad.getDirection() == PadDirection.SINK) {
+				Pad peer = pad.getPeer();
+				Caps cap = peer.getNegotiatedCaps();
+				String capString = cap.toString();
+				System.out.println("sent " + capString);
+				return capString;
+
+			}
+		}
+		return null;
+	}
+	
+	
 
 }

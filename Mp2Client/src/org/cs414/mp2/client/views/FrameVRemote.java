@@ -3,12 +3,7 @@ package org.cs414.mp2.client.views;
 import java.awt.Color;
 import java.awt.event.ActionListener;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 import org.cs414.mp2.client.controllers.Listener;
 
@@ -44,7 +39,7 @@ public class FrameVRemote extends JFrame {
 	private JPanel panelFile = null;
 
 	private JButton btnStart = null;
-	private JButton btnResume = null;
+	//private JButton btnResume = null;
 	//private JButton btnRecord = null;
 	private JButton btnStop = null;
 	private JButton btnPause = null;
@@ -52,8 +47,27 @@ public class FrameVRemote extends JFrame {
 	private JButton btnRW = null;
 
 	private JButton btnBand = null;
+
+	private JRadioButton smallVideoSelect;
+	private JRadioButton largeVideoSelect;
 	
 	private JTextField textFilePath = null;
+
+	private byte videoSelection = 0;
+
+	public byte getVideoSelection() {
+		return videoSelection;
+	}
+	public void setVideoSelection(byte newSelection) {
+		videoSelection = newSelection;
+		if(newSelection == Listener.BIG_VIDEO) {
+			smallVideoSelect.setSelected(false);
+		}
+		if(newSelection == Listener.SMALL_VIDEO) {
+			largeVideoSelect.setSelected(false);
+		}
+	}
+
 
 	/**
 	 * Initialize the contents of the frame.
@@ -77,11 +91,11 @@ public class FrameVRemote extends JFrame {
 		
 		// PlayRecord Panel
 		btnStart = new JButton(BUTTON_START);
-		btnResume = new JButton(BUTTON_RESUME);
+		//btnResume = new JButton(BUTTON_RESUME);
 		//btnRecord = new JButton(BUTTON_RECORD);
 		btnStop = new JButton(BUTTON_STOP);
 		panelPlayRecord.add(btnStart);
-		panelPlayRecord.add(btnResume);
+		//panelPlayRecord.add(btnResume);
 		//panelPlayRecord.add(btnRecord);
 		panelPlayRecord.add(btnStop);
 		
@@ -99,6 +113,11 @@ public class FrameVRemote extends JFrame {
 		JLabel labelBandwidth = new JLabel("Bandwidth");
 		btnBand = new JButton(BUTTON_BAND);
 		panelFile.add(btnBand);
+		smallVideoSelect = new JRadioButton("320x240");
+		smallVideoSelect.setSelected(true);
+		panelFile.add(smallVideoSelect);
+		largeVideoSelect = new JRadioButton("640x480");
+		panelFile.add(largeVideoSelect);
 
 
 		// initial disables
@@ -113,8 +132,8 @@ public class FrameVRemote extends JFrame {
 		// PlayRecordPanel listener
 		btnStart.addActionListener(listener);
 		btnStart.setActionCommand(Listener.ACTION_START);
-		btnResume.addActionListener(listener);
-		btnResume.setActionCommand(Listener.ACTION_RESUME);
+		//btnResume.addActionListener(listener);
+		//btnResume.setActionCommand(Listener.ACTION_RESUME);
 		//btnRecord.addActionListener(listener);
 		//btnRecord.setActionCommand(Listener.ACTION_RECORD);
 		btnStop.addActionListener(listener);
@@ -131,6 +150,10 @@ public class FrameVRemote extends JFrame {
 
 		btnBand.addActionListener(listener);
 		btnBand.setActionCommand(Listener.ACTION_SETBAND);
+		smallVideoSelect.addActionListener(listener);
+		smallVideoSelect.setActionCommand(Listener.ACTION_SMALL);
+		largeVideoSelect.addActionListener(listener);
+		largeVideoSelect.setActionCommand(Listener.ACTION_BIG);
 	}
 	
 	public void enablePlayRecord(boolean enable) {
@@ -142,7 +165,7 @@ public class FrameVRemote extends JFrame {
 	}
 	
 	public void enablePlayControllers(boolean enable) {
-		btnResume.setEnabled(enable);
+		//btnResume.setEnabled(enable);
 		btnPause.setEnabled(enable);
 		btnFF.setEnabled(enable);
 		btnRW.setEnabled(enable);

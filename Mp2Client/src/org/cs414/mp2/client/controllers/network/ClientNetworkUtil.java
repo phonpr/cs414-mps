@@ -7,7 +7,13 @@ import java.net.Socket;
  */
 public class ClientNetworkUtil{
 
-	public static NetworkUtil clientNetworkUtil = new NetworkUtil("localhost", 7000);
+	private static NetworkUtil clientNetworkUtil = null;
+
+	private static final int SERVER_PORT = 7000;
+
+	public static void initializeNetwork(String hostname) {
+		clientNetworkUtil = new NetworkUtil(hostname, SERVER_PORT);
+	}
 
 	public static void sendStart(int requestedResource) {
 		clientNetworkUtil.sendMessage(NetworkConstants.START_CMD + requestedResource);

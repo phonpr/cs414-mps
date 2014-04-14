@@ -49,7 +49,7 @@ public class RecordController extends Controller {
 	 * @param audType So does this one
 	 */
 	public RecordController(File file, int width, int height, int frames, int samples, VideoType vidType, AudioType audType ) {
-		super(file, OperationType.RECORDING);
+		super(OperationType.RECORDING);
 		
 		this.width = width;
 		this.height = height;

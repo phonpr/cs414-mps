@@ -36,7 +36,7 @@ public class Listener implements ActionListener {
 	private DialogBandwidthOptions dialogBandwidthOptions = null;
 
 	// controller
-	private Controller controller = null;
+	private PlayController controller = null;
 	
 	public Listener(FrameVRemote frameRemote) {
 		this.frameRemote = frameRemote;
@@ -50,10 +50,10 @@ public class Listener implements ActionListener {
 			//controller = new PlayController(file);
 			//controller.startRunning();
 			if(/* ResourceNegotiation.doAdmission() */true) { //TODO UNCOMMENT
+				controller = new PlayController();
 				ClientNetworkUtil.sendStart(ResourceNegotiation.getAvailable());
 				String goMessage = ClientNetworkUtil.waitForGoMessage();
-
-				System.out.println(goMessage);
+				controller.startRunning();
 			}
 
 

@@ -13,7 +13,7 @@ import org.gstreamer.Gst;
 
 public class Main {
 	
-	private static final int SERVER_PORT = 5000;
+	private static final int SERVER_PORT = 7000;
 	private static final int UDPSINK_PORT = 5001;
 	
 	private static boolean serverRunning = true;
@@ -22,7 +22,7 @@ public class Main {
 		Gst.init();
 		
 		System.out.println("Starting server...");
-		
+
 		int bandwidthLimit = 0;
 		try {
 			bandwidthLimit = Integer.parseInt(readFile("resource.txt"));

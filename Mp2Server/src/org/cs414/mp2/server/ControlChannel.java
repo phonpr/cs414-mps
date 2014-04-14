@@ -54,16 +54,18 @@ public class ControlChannel implements Runnable {
 						bandwidth = Integer.parseInt(paramSplit[0]);
 						int size = Integer.parseInt(paramSplit[1]);
 						
-						bandwidth = Math.max(bandwidth, ResourceManager.getCurrentBandwidth());
+						bandwidth = Math.min(bandwidth, ResourceManager.getBandwidthLimit() - ResourceManager.getCurrentBandwidth());
 						int framerate = calcFramerate(bandwidth, size);
 						
 						if (framerate == -1) {
 							writer.println("FALSE");
+							System.out.println("Not enough server bandwidth sorry...");
 						} else {
 							ResourceManager.addBandwidth(bandwidth);
 
 							mediaThread = new MediaThread(framerate, size, socket.getInetAddress().getHostAddress());
-
+							
+							System.out.println("Frame rate : " + framerate);
 							new Thread(mediaThread).start();
 
 						}

@@ -24,7 +24,7 @@ public class ResourceNegotiation {
 	private static final int audioRequiredBandwidth = 8000;
 
 	public static boolean doAdmission(byte video) {
-		if(requiredFrames(available, video) > MIN_FRAMERATE) {
+		if(requiredFrames(available, video) >= MIN_FRAMERATE) {
 			return true;
 		}
 		return false;

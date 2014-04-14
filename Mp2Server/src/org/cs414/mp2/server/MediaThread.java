@@ -1,7 +1,6 @@
 package org.cs414.mp2.server;
 
 
-import java.net.InetAddress;
 
 public class MediaThread implements Runnable {
 

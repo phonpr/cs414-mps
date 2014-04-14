@@ -20,7 +20,7 @@ public class ClientNetworkUtil{
 	}
 
 	public static String waitForGoMessage() {
-		String nextMessage = clientNetworkUtil.readMessage();
+		String nextMessage = null;
 
 		while(nextMessage == null) {
 			nextMessage = clientNetworkUtil.readMessage();

@@ -64,6 +64,7 @@ public class ControlChannel implements Runnable {
 
 							mediaThread = new MediaThread(framerate, size, socket.getInetAddress().getHostAddress());
 
+							writer.println("TRUE");
 							new Thread(mediaThread).start();
 
 						}

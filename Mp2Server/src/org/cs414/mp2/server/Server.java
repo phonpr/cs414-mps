@@ -39,7 +39,7 @@ public class Server {
 		Element vidRate = ElementFactory.make("videorate", "ratechange");
 		Element vidEnc = ElementFactory.make("jpegenc", "stupidenc");
 		
-		vidRate.set("max-rate", 10);
+		vidRate.set("max-rate", 1);
 				
 		Element vidrtppay = ElementFactory.make("rtpjpegpay", "vidpay");
 		Element audrtppay = ElementFactory.make("rtppcmapay", "audpay");

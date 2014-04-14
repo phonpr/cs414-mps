@@ -32,13 +32,13 @@ public class Server {
 		this.hostAddress = hostAddress;
 	}
 
-	public void createPipeline(int framerate) {
+	public void createPipeline(int framerate, int videoSize) {
 		FileSrc fileSrc = (FileSrc) ElementFactory.make("filesrc", "filesrc");
 		
 		if (videoSize == 1) {
-			fileSrc.setLocation(new File("testvideo.avi") );
+			fileSrc.setLocation(new File("video_big.avi") );
 		} else {
-			///TODO add other video here
+			fileSrc.setLocation(new File("video_small.avi"));
 		}
 
 		Element demux = ElementFactory.make("avidemux", "demux");

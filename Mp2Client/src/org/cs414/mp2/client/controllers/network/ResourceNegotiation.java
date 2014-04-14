@@ -13,13 +13,13 @@ public class ResourceNegotiation {
 
 	private static final int MIN_FRAMERATE = 15;
 
-	private static final int smallVideoBitrate = 0;
+	private static final int smallVideoBitrate = 17158;
 
-	private static final int smallVideoMax = 0;
+	private static final int smallVideoMax = 436950;
 
-	private static final int largeVideoBitrate = 29002;
+	private static final int largeVideoBitrate = 61988;
 
-	private static final int largeVideoMax = 733050;
+	private static final int largeVideoMax = 1557700;
 
 	private static final int audioRequiredBandwidth = 8000;
 

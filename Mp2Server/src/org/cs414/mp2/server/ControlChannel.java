@@ -18,8 +18,8 @@ public class ControlChannel implements Runnable {
 	private static final String PASSIVE_CMD	= "PASSIVE";
 
 	private final int AUDIO_BANDWIDTH = 8000;
-	private final int VIDEO_BANDWIDTH_L = 29002;
-	private final int VIDEO_BANDWIDTH_S = 00000; ///TODO new number
+	private final int VIDEO_BANDWIDTH_L = 61988;
+	private final int VIDEO_BANDWIDTH_S = 17158; ///TODO new number
 	
 	private Socket socket = null;
 	private PrintWriter writer = null;
@@ -62,7 +62,7 @@ public class ControlChannel implements Runnable {
 						} else {
 							ResourceManager.addBandwidth(bandwidth);
 
-							mediaThread = new MediaThread(framerate, socket.getInetAddress().getHostAddress());
+							mediaThread = new MediaThread(framerate, size, socket.getInetAddress().getHostAddress());
 
 							new Thread(mediaThread).start();
 

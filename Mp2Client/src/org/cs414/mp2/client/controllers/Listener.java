@@ -4,7 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-import javax.swing.JFileChooser;
+import javax.swing.*;
 
 import org.cs414.mp2.client.controllers.Controller.AudioType;
 import org.cs414.mp2.client.controllers.Controller.VideoType;
@@ -62,8 +62,20 @@ public class Listener implements ActionListener {
 				ClientNetworkUtil.sendStart(ResourceNegotiation.getRequestedRate(frameRemote.getVideoSelection()), frameRemote.getVideoSelection());
 
 				String goMessage = ClientNetworkUtil.waitForGoMessage();
-
-				controller.startRunning();
+				System.out.println("GOGOGO");
+				if(goMessage.startsWith("TRUE")) {
+					System.out.println("I GOT HERE");
+					controller.startRunning();
+				}
+				else if(goMessage.startsWith("FALSE")) {
+					JOptionPane.showMessageDialog(null, "Not enough resources on server");
+				}
+				else {
+					System.out.println("Expected TRUE or FALSE response from server, got: " + goMessage);
+				}
+			}
+			else {
+				JOptionPane.showMessageDialog(null, "Not enough resources on client");
 			}
 
 
@@ -74,6 +86,21 @@ public class Listener implements ActionListener {
 			if(dialogBandwidthOptions.isChanged()) {
 				dialogBandwidthOptions.acknowledgeChanged();
 				ResourceNegotiation.setAvailable(dialogBandwidthOptions.getMaxBandwidth());
+
+				if(controller != null) {
+					if (ResourceNegotiation.doAdmission(frameRemote.getVideoSelection())) {
+						ClientNetworkUtil.sendStop();
+						ClientNetworkUtil.sendStart(ResourceNegotiation.getRequestedRate(frameRemote.getVideoSelection()), frameRemote.getVideoSelection());
+						String goMessage = ClientNetworkUtil.waitForGoMessage();
+						System.out.println(goMessage);
+						if ("TRUE".equals(goMessage)) {
+							controller.startRunning();
+						} else if ("FALSE".equals(goMessage)) {
+							JOptionPane.showMessageDialog(null, "Not enough resources on server");
+						}
+					} else
+						JOptionPane.showMessageDialog(null, "Not enough resources on server");
+				}
 			}
 		}
 		else if(action == ACTION_RESUME) {

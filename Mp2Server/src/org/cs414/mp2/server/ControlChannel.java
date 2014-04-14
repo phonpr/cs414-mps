@@ -64,8 +64,8 @@ public class ControlChannel implements Runnable {
 							ResourceManager.addBandwidth(bandwidth);
 
 							mediaThread = new MediaThread(framerate, size, socket.getInetAddress().getHostAddress());
-							
 							System.out.println("Frame rate : " + framerate);
+							writer.println("TRUE");
 							new Thread(mediaThread).start();
 
 						}

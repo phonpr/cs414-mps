@@ -3,6 +3,7 @@ package org.cs414.mp2.client.controllers.network;
 import java.io.*;
 import java.net.Socket;
 import java.util.Queue;
+import java.util.Stack;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -10,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class NetworkUtil {
 	protected Socket socket;
-	protected LinkedBlockingQueue<String> messageQueue;
+	protected Stack<String> messageStack;
 
 	protected PrintWriter writer;
 	protected BufferedReader reader;
@@ -30,7 +31,7 @@ public class NetworkUtil {
 					while(reader.ready()) {
 						String lineRead = reader.readLine();
 						System.out.println(lineRead);
-						messageQueue.offer(lineRead);
+						messageStack.push(lineRead);
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -50,7 +51,7 @@ public class NetworkUtil {
 			socket = new Socket(hostName, portNum);
 			writer = new PrintWriter(socket.getOutputStream());
 			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			messageQueue = new LinkedBlockingQueue();
+			messageStack = new Stack<String>();
 
 			messageListener = new ReadCommandsListener();
 			new Thread(messageListener).start();
@@ -65,12 +66,9 @@ public class NetworkUtil {
 	}
 
 	public String readMessage() {
-		if(!messageQueue.isEmpty()) {
-			try {
-				return messageQueue.take();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		if(!messageStack.isEmpty()) {
+			System.out.println("SIZE: " + messageStack.size());
+			return messageStack.pop();
 		}
 
 		return null;

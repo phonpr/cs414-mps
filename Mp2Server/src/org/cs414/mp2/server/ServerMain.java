@@ -50,7 +50,7 @@ public class ServerMain {
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
-						System.out.println("Client Connected!");
+						System.out.println("Client Connected from : " + socket.getInetAddress().getHostAddress());
 						
 						// control channel
 						new Thread(new ControlChannel(socket)).start();

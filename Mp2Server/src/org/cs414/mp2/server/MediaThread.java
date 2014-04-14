@@ -1,15 +1,17 @@
 package org.cs414.mp2.server;
 
 
-import org.gstreamer.Gst;
+import java.net.InetAddress;
 
 public class MediaThread implements Runnable {
 
-	Server server;
-	int framerate;
+	private Server server;
+	private int framerate;
+	private String hostAddress;
 	
-	public MediaThread(int frames) {
-		framerate = frames;
+	public MediaThread(int frames, String hostAddress) {
+		this.framerate = frames;
+		this.hostAddress = hostAddress;
 	}
 
 	public void stop() {
@@ -42,8 +44,7 @@ public class MediaThread implements Runnable {
 	
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
-		server = new Server();
+		server = new Server(hostAddress);
 		server.createPipeline(framerate);
 
 		server.play();

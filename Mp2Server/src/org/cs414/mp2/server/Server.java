@@ -43,6 +43,8 @@ public class Server {
 		Element vidEnc = ElementFactory.make("jpegenc", "stupidenc");
 		
 		vidRate.set("max-rate", framerate);
+		
+		System.out.println("setting framerate at " + framerate);
 				
 		Element vidrtppay = ElementFactory.make("rtpjpegpay", "vidpay");
 		Element audrtppay = ElementFactory.make("rtppcmapay", "audpay");

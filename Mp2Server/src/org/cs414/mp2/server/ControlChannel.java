@@ -19,7 +19,7 @@ public class ControlChannel implements Runnable {
 
 	private final int AUDIO_BANDWIDTH = 8000;
 	private final int VIDEO_BANDWIDTH_L = 29002;
-	private final int VIDEO_BANDWIDTH_S = 00000;
+	private final int VIDEO_BANDWIDTH_S = 00000; ///TODO new number
 	
 	private Socket socket = null;
 	private PrintWriter writer = null;

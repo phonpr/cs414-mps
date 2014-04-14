@@ -6,6 +6,11 @@ import org.gstreamer.Gst;
 public class MediaThread implements Runnable {
 
 	Server server;
+	int framerate;
+	
+	public MediaThread(int frames) {
+		framerate = frames;
+	}
 
 	public void stop() {
 
@@ -39,7 +44,7 @@ public class MediaThread implements Runnable {
 	public void run() {
 		// TODO Auto-generated method stub
 		server = new Server();
-		server.createPipeline();
+		server.createPipeline(framerate);
 
 		server.play();
 

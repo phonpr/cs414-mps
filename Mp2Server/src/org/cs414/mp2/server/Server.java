@@ -17,7 +17,7 @@ import java.util.List;
 public class Server {
 
 	private Pipeline pipe;
-
+	
 	private enum PlayType {
 		NORMAL	,
 		FF		,
@@ -26,7 +26,7 @@ public class Server {
 
 	private PlayType ePlayType = PlayType.NORMAL;
 
-	public void createPipeline() {
+	public void createPipeline(int framerate) {
 		FileSrc fileSrc = (FileSrc) ElementFactory.make("filesrc", "filesrc");
 		fileSrc.setLocation(new File("testvideo.avi") );
 
@@ -39,7 +39,7 @@ public class Server {
 		Element vidRate = ElementFactory.make("videorate", "ratechange");
 		Element vidEnc = ElementFactory.make("jpegenc", "stupidenc");
 		
-		vidRate.set("max-rate", 1);
+		vidRate.set("max-rate", framerate);
 				
 		Element vidrtppay = ElementFactory.make("rtpjpegpay", "vidpay");
 		Element audrtppay = ElementFactory.make("rtppcmapay", "audpay");

@@ -16,6 +16,10 @@ public class ControlChannel implements Runnable {
 	private static final String RW_CMD		= "RW";
 	private static final String ACTIVE_CMD	= "ACTIVE";
 	private static final String PASSIVE_CMD	= "PASSIVE";
+
+	private final int AUDIO_BANDWIDTH = 8000;
+	private final int VIDEO_BANDWIDTH_L = 29002;
+	private final int VIDEO_BANDWIDTH_S = 00000;
 	
 	private Socket socket = null;
 	private PrintWriter writer = null;
@@ -33,7 +37,7 @@ public class ControlChannel implements Runnable {
 			writer = new PrintWriter(socket.getOutputStream(), true);
 			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			
-			MediaThread mediaThread = new MediaThread();
+			MediaThread mediaThread = null;
 			
 			String inputLine = null;
 			while ((inputLine = reader.readLine()) != null) {
@@ -42,21 +46,25 @@ public class ControlChannel implements Runnable {
 				writer.println(inputLine);
 				
 				if (inputLine.startsWith(START_CMD)) {
-					String parameter = inputLine.substring(START_CMD.length());
-					System.out.println("START parameter : " +  parameter);
+					String parameters = inputLine.substring(START_CMD.length());
+					System.out.println("START parameters : " +  parameters);
 					
-					if (parameter.length() > 0) {
-						bandwidth = Integer.parseInt(parameter);
+					if (parameters.length() > 0) {
+						String[] paramSplit = parameters.split(" ");
+						bandwidth = Integer.parseInt(paramSplit[0]);
 						
-						if (ResourceManager.isBandwidthAvailable(bandwidth)) {
+						bandwidth = Math.max(bandwidth, ResourceManager.getCurrentBandwidth());
+						int framerate = calcFramerate(bandwidth, Integer.parseInt(paramSplit[1]));
+						
+						if (framerate == -1) {
+							writer.println("FALSE");
+						} else {
 							ResourceManager.addBandwidth(bandwidth);
+
+							mediaThread = new MediaThread(framerate);
 
 							new Thread(mediaThread).start();
 
-							writer.println("TRUE");
-						}
-						else {
-							writer.println("FALSE");
 						}
 					}
 				}
@@ -91,6 +99,23 @@ public class ControlChannel implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	
+	private int calcFramerate(int band, int size) {
+		int vidband = 0;
+		if (size == 1)
+			vidband = VIDEO_BANDWIDTH_L;
+		else
+			vidband = VIDEO_BANDWIDTH_S;
+		
+		int framerate = (band - AUDIO_BANDWIDTH) / vidband; // (availiable - audio) / video gives frames/sec
+		if (framerate >= 25)
+			return 25;
+		else if (framerate <= 15)
+			return -1;
+		else
+			return framerate;
 	}
 
 }

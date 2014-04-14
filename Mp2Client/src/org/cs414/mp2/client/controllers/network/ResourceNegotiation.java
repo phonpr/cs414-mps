@@ -11,11 +11,20 @@ import java.io.IOException;
 public class ResourceNegotiation {
 	private static int available = getAvailableFromFile();
 
+	private static final int MIN_FRAMERATE = 15;
+
+	private static final int smallVideoBitrate = 0;
+
+	private static final int largeVideoBitrate = 29002;
+
+	private static final int largeVideoMax = 733050;
+
+	private static final int audioRequiredBandwidth = 8000;
+
 	public static boolean doAdmission() {
-		if (getAvailable() >= getRequired()) {
+		if(requiredFrames(available) > MIN_FRAMERATE) {
 			return true;
 		}
-
 		return false;
 	}
 
@@ -40,13 +49,16 @@ public class ResourceNegotiation {
 		return available;
 	}
 
-	private static int getRequired() {
-		//TODO: CALCULATIONS HERE
-		return 0;
+	public static int requiredFrames(int available) {
+		return (available - 8000) / 29002;
 	}
 
-	public static boolean doNegotiation() {
-
-		return false;
+	public static int getRequestedRate() {
+		if (largeVideoMax < available) {
+			return largeVideoMax;
+		}
+		else {
+			return available;
+		}
 	}
 }

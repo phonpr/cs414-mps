@@ -7,9 +7,11 @@ public class MediaThread implements Runnable {
 
 	Server server;
 	int framerate;
+	int size;
 	
-	public MediaThread(int frames) {
+	public MediaThread(int frames, int vidSize) {
 		framerate = frames;
+		size = vidSize;
 	}
 
 	public void stop() {
@@ -44,7 +46,7 @@ public class MediaThread implements Runnable {
 	public void run() {
 		// TODO Auto-generated method stub
 		server = new Server();
-		server.createPipeline(framerate);
+		server.createPipeline(framerate, size);
 
 		server.play();
 

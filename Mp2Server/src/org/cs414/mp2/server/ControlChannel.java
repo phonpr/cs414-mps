@@ -52,16 +52,17 @@ public class ControlChannel implements Runnable {
 					if (parameters.length() > 0) {
 						String[] paramSplit = parameters.split(" ");
 						bandwidth = Integer.parseInt(paramSplit[0]);
+						int size = Integer.parseInt(paramSplit[1]);
 						
 						bandwidth = Math.max(bandwidth, ResourceManager.getCurrentBandwidth());
-						int framerate = calcFramerate(bandwidth, Integer.parseInt(paramSplit[1]));
+						int framerate = calcFramerate(bandwidth, size);
 						
 						if (framerate == -1) {
 							writer.println("FALSE");
 						} else {
 							ResourceManager.addBandwidth(bandwidth);
 
-							mediaThread = new MediaThread(framerate);
+							mediaThread = new MediaThread(framerate, size);
 
 							new Thread(mediaThread).start();
 

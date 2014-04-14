@@ -6,13 +6,11 @@ package org.cs414.mp2.server;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
-import org.gstreamer.PadDirection;
 import org.gstreamer.elements.*;
 import org.gstreamer.*;
 import org.gstreamer.elements.good.RTPBin;
 
 import java.io.File;
-import java.util.List;
 
 public class Server {
 
@@ -26,9 +24,14 @@ public class Server {
 
 	private PlayType ePlayType = PlayType.NORMAL;
 
-	public void createPipeline(int framerate) {
+	public void createPipeline(int framerate, int videoSize) {
 		FileSrc fileSrc = (FileSrc) ElementFactory.make("filesrc", "filesrc");
-		fileSrc.setLocation(new File("testvideo.avi") );
+		
+		if (videoSize == 1) {
+			fileSrc.setLocation(new File("testvideo.avi") );
+		} else {
+			///TODO add other video here
+		}
 
 		Element demux = ElementFactory.make("avidemux", "demux");
 

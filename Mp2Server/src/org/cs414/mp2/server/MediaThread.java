@@ -6,10 +6,12 @@ public class MediaThread implements Runnable {
 
 	private Server server;
 	private int framerate;
+	private int videoSize;
 	private String hostAddress;
 	
-	public MediaThread(int frames, String hostAddress) {
+	public MediaThread(int frames, int size, String hostAddress) {
 		this.framerate = frames;
+		this.videoSize = size;
 		this.hostAddress = hostAddress;
 	}
 
@@ -44,7 +46,7 @@ public class MediaThread implements Runnable {
 	@Override
 	public void run() {
 		server = new Server(hostAddress);
-		server.createPipeline(framerate);
+		server.createPipeline(framerate, videoSize);
 
 		server.play();
 

@@ -32,9 +32,14 @@ public class Server {
 		this.hostAddress = hostAddress;
 	}
 
-	public void createPipeline(int framerate) {
+	public void createPipeline(int framerate, int videoSize) {
 		FileSrc fileSrc = (FileSrc) ElementFactory.make("filesrc", "filesrc");
-		fileSrc.setLocation(new File("testvideo.avi") );
+		
+		if (videoSize == 1) {
+			fileSrc.setLocation(new File("video_big.avi") );
+		} else {
+			fileSrc.setLocation(new File("video_small.avi"));
+		}
 
 		Element demux = ElementFactory.make("avidemux", "demux");
 
@@ -46,6 +51,8 @@ public class Server {
 		Element vidEnc = ElementFactory.make("jpegenc", "stupidenc");
 		
 		vidRate.set("max-rate", framerate);
+		
+		System.out.println("setting framerate at " + framerate);
 				
 		Element vidrtppay = ElementFactory.make("rtpjpegpay", "vidpay");
 		Element audrtppay = ElementFactory.make("rtppcmapay", "audpay");
@@ -164,7 +171,7 @@ public class Server {
 			pipe.seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, currentTime, SeekType.NONE, -1);
 		}
 		else {
-			pipe.seek(ClockTime.ZERO);
+			pipe.seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, 0, SeekType.SET, currentTime);
 		}
 
 	}

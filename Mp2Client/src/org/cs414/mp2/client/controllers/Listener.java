@@ -38,14 +38,17 @@ public class Listener implements ActionListener {
 	
 	// dialog
 	private DialogRecordOptions dialogRecordOptions = null;
-
 	private DialogBandwidthOptions dialogBandwidthOptions = null;
 
 	// controller
 	private PlayController controller = null;
 	
-	public Listener(FrameVRemote frameRemote) {
+	// networking
+	private String hostname = "127.0.0.1";
+	
+	public Listener(FrameVRemote frameRemote, String serverIp) {
 		this.frameRemote = frameRemote;
+		this.hostname = serverIp;
 	}
 
 	@Override
@@ -54,7 +57,6 @@ public class Listener implements ActionListener {
 		
 		if (action == ACTION_START) {
 			if(ResourceNegotiation.doAdmission(frameRemote.getVideoSelection())) { //TODO UNCOMMENT
-				String hostname = "172.16.229.1";
 
 				controller = new PlayController();
 				controller.setHostname(hostname);

@@ -1,6 +1,5 @@
 package org.cs414.mp2.client.controllers.network;
 
-import java.net.Socket;
 
 /**
  * Created by bill on 4/12/14.

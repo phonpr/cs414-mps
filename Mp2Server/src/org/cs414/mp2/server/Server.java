@@ -169,7 +169,7 @@ public class Server {
 			pipe.seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, currentTime, SeekType.NONE, -1);
 		}
 		else {
-			pipe.seek(newRate, Format.TIME, SeekFlags.FLUSH, SeekType.SET, 0, SeekType.SET, currentTime);
+			pipe.seek(ClockTime.ZERO);
 		}
 
 	}

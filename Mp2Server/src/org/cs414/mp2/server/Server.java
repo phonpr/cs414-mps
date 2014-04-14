@@ -39,7 +39,7 @@ public class Server {
 		Element vidRate = ElementFactory.make("videorate", "ratechange");
 		Element vidEnc = ElementFactory.make("jpegenc", "stupidenc");
 		
-		vidRate.set("max-rate", 10);
+		vidRate.set("max-rate", 1);
 				
 		Element vidrtppay = ElementFactory.make("rtpjpegpay", "vidpay");
 		Element audrtppay = ElementFactory.make("rtppcmapay", "audpay");
@@ -49,19 +49,19 @@ public class Server {
 		Element vidUDPSink = ElementFactory.make("udpsink", "vidudpsink");
 		Element vidRTCPSrc = ElementFactory.make("udpsrc", "vidrtcpsrc");
 		Element vidRTCPSink = ElementFactory.make("udpsink", "vidrtcpsink");
-		vidUDPSink.set("host", "172.16.206.138");
+		vidUDPSink.set("host", "localhost");
 		vidUDPSink.set("port", 5000);
 		vidRTCPSrc.set("port", 5005);
-		vidRTCPSink.set("host", "172.16.206.138");
+		vidRTCPSink.set("host", "localhost");
 		vidRTCPSink.set("port", 5001);
 
 		Element audUDPSink = ElementFactory.make("udpsink", "aududpsink");
 		Element audRTCPSrc = ElementFactory.make("udpsrc", "audrtcpsrc");
 		Element audRTCPSink = ElementFactory.make("udpsink", "audrtcpsink");
-		audUDPSink.set("host", "172.16.206.138");
+		audUDPSink.set("host", "localhost");
 		audUDPSink.set("port", 5002);
 		audRTCPSrc.set("port", 5007);
-		audRTCPSink.set("host", "172.16.206.138");
+		audRTCPSink.set("host", "localhost");
 		audRTCPSink.set("port", 5003);
 
 		pipe = new Pipeline();

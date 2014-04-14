@@ -9,12 +9,19 @@ public class ResourceManager {
 	}
 	
 	public static void addBandwidth(int bandwidth) {
-		currentBandwidth += bandwidth;
-		System.out.println("Current Bandwidth : " + currentBandwidth + " / " + bandwidthLimit);
+		if (currentBandwidth + bandwidth <= bandwidthLimit) {
+			currentBandwidth += bandwidth;
+			System.out.println("Current Bandwidth : " + currentBandwidth + " / " + bandwidthLimit);
+		}
+		else {
+			System.out.println("Not enough server resource");
+		}
 	}
 	
 	public static void subtractBandwidth(int bandwidth) {
-		currentBandwidth -= bandwidth;
+		if (currentBandwidth - bandwidth >= 0) {
+			currentBandwidth -= bandwidth;
+		}
 		System.out.println("Current Bandwidth : " + currentBandwidth + " / " + bandwidthLimit);
 	}
 	

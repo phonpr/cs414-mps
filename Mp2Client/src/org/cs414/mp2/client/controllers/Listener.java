@@ -26,6 +26,12 @@ public class Listener implements ActionListener {
 	public static final String ACTION_PAUSE = "pause";
 	public static final String ACTION_FF = "ff";
 	public static final String ACTION_RW = "rw";
+
+	public static final String ACTION_SMALL = "small";
+	public static final String ACTION_BIG = "big";
+
+	public static final byte SMALL_VIDEO = 0;
+	public static final byte BIG_VIDEO = 1;
 	
 	// frames
 	private FrameVRemote frameRemote = null;
@@ -47,10 +53,12 @@ public class Listener implements ActionListener {
 		String action = event.getActionCommand();
 		
 		if (action == ACTION_START) {
-			//controller = new PlayController(file);
-			//controller.startRunning();
 			if(/* ResourceNegotiation.doAdmission() */true) { //TODO UNCOMMENT
+				String hostname = "localhost";
+
 				controller = new PlayController();
+				controller.setHostname(hostname);
+				ClientNetworkUtil.initializeNetwork(hostname);
 				ClientNetworkUtil.sendStart(ResourceNegotiation.getAvailable());
 				String goMessage = ClientNetworkUtil.waitForGoMessage();
 				controller.startRunning();
@@ -93,6 +101,12 @@ public class Listener implements ActionListener {
 			if (controller != null) {
 				ClientNetworkUtil.sendRewind();
 			}
+		}
+		else if(action == ACTION_SMALL) {
+			frameRemote.setVideoSelection(SMALL_VIDEO);
+		}
+		else if(action == ACTION_BIG) {
+			frameRemote.setVideoSelection(BIG_VIDEO);
 		}
 		else ;
 	}

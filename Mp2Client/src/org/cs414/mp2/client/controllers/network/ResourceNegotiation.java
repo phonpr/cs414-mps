@@ -15,14 +15,16 @@ public class ResourceNegotiation {
 
 	private static final int smallVideoBitrate = 0;
 
+	private static final int smallVideoMax = 0;
+
 	private static final int largeVideoBitrate = 29002;
 
 	private static final int largeVideoMax = 733050;
 
 	private static final int audioRequiredBandwidth = 8000;
 
-	public static boolean doAdmission() {
-		if(requiredFrames(available) > MIN_FRAMERATE) {
+	public static boolean doAdmission(byte video) {
+		if(requiredFrames(available, video) > MIN_FRAMERATE) {
 			return true;
 		}
 		return false;
@@ -49,16 +51,30 @@ public class ResourceNegotiation {
 		return available;
 	}
 
-	public static int requiredFrames(int available) {
-		return (available - 8000) / 29002;
+	public static int requiredFrames(int available, byte video) {
+		if(video == 0)
+			return (available - 8000) / smallVideoBitrate;
+		else if(video == 1)
+			return (available - 8000) / largeVideoBitrate;
+		return 0;
 	}
 
-	public static int getRequestedRate() {
-		if (largeVideoMax < available) {
-			return largeVideoMax;
+	public static int getRequestedRate(byte video) {
+		if(video == 0) {
+			if (smallVideoMax < available) {
+				return largeVideoMax;
+			} else {
+				return available;
+			}
 		}
-		else {
-			return available;
+		else if(video == 1) {
+			if (largeVideoMax < available) {
+				return smallVideoMax;
+			} else {
+				return available;
+			}
 		}
+
+		return 0;
 	}
 }

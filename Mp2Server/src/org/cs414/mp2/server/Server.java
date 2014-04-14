@@ -6,15 +6,19 @@ package org.cs414.mp2.server;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
+import org.gstreamer.PadDirection;
 import org.gstreamer.elements.*;
 import org.gstreamer.*;
 import org.gstreamer.elements.good.RTPBin;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.util.List;
 
 public class Server {
 
 	private Pipeline pipe;
+	private String hostAddress;
 	
 	private enum PlayType {
 		NORMAL	,
@@ -24,7 +28,11 @@ public class Server {
 
 	private PlayType ePlayType = PlayType.NORMAL;
 
-	public void createPipeline(int framerate, int videoSize) {
+	public Server(String hostAddress) {
+		this.hostAddress = hostAddress;
+	}
+
+	public void createPipeline(int framerate) {
 		FileSrc fileSrc = (FileSrc) ElementFactory.make("filesrc", "filesrc");
 		
 		if (videoSize == 1) {
@@ -54,19 +62,19 @@ public class Server {
 		Element vidUDPSink = ElementFactory.make("udpsink", "vidudpsink");
 		Element vidRTCPSrc = ElementFactory.make("udpsrc", "vidrtcpsrc");
 		Element vidRTCPSink = ElementFactory.make("udpsink", "vidrtcpsink");
-		vidUDPSink.set("host", "localhost");
+		vidUDPSink.set("host", hostAddress);
 		vidUDPSink.set("port", 5000);
 		vidRTCPSrc.set("port", 5005);
-		vidRTCPSink.set("host", "localhost");
+		vidRTCPSink.set("host", hostAddress);
 		vidRTCPSink.set("port", 5001);
 
 		Element audUDPSink = ElementFactory.make("udpsink", "aududpsink");
 		Element audRTCPSrc = ElementFactory.make("udpsrc", "audrtcpsrc");
 		Element audRTCPSink = ElementFactory.make("udpsink", "audrtcpsink");
-		audUDPSink.set("host", "localhost");
+		audUDPSink.set("host", hostAddress);
 		audUDPSink.set("port", 5002);
 		audRTCPSrc.set("port", 5007);
-		audRTCPSink.set("host", "localhost");
+		audRTCPSink.set("host", hostAddress);
 		audRTCPSink.set("port", 5003);
 
 		pipe = new Pipeline();

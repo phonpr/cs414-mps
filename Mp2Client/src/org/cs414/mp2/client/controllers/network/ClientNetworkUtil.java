@@ -15,8 +15,8 @@ public class ClientNetworkUtil{
 		clientNetworkUtil = new NetworkUtil(hostname, SERVER_PORT);
 	}
 
-	public static void sendStart(int requestedResource) {
-		clientNetworkUtil.sendMessage(NetworkConstants.START_CMD + requestedResource);
+	public static void sendStart(int requestedResource, int requestedVideo) {
+		clientNetworkUtil.sendMessage(NetworkConstants.START_CMD + requestedResource + " " + requestedVideo);
 	}
 
 	public static String waitForGoMessage() {
@@ -33,7 +33,6 @@ public class ClientNetworkUtil{
 
 		return nextMessage;
 	}
-
 	public static void sendStop() {
 		clientNetworkUtil.sendMessage(NetworkConstants.STOP_CMD);
 	}

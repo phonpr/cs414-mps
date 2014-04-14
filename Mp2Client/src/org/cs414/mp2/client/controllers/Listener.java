@@ -53,14 +53,16 @@ public class Listener implements ActionListener {
 		String action = event.getActionCommand();
 		
 		if (action == ACTION_START) {
-			if(/* ResourceNegotiation.doAdmission() */true) { //TODO UNCOMMENT
+			if(ResourceNegotiation.doAdmission()) { //TODO UNCOMMENT
 				String hostname = "localhost";
 
 				controller = new PlayController();
 				controller.setHostname(hostname);
 				ClientNetworkUtil.initializeNetwork(hostname);
-				ClientNetworkUtil.sendStart(ResourceNegotiation.getAvailable());
+				ClientNetworkUtil.sendStart(ResourceNegotiation.getRequestedRate(), frameRemote.getVideoSelection());
+
 				String goMessage = ClientNetworkUtil.waitForGoMessage();
+
 				controller.startRunning();
 			}
 

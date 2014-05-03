@@ -20,8 +20,8 @@ public class ServerMain {
 
 	public static void main(String[] args) {
 		Gst.init();
-		String arg = WEBCAM;
-//		String arg = DESKTOP;
+//		String arg = WEBCAM;
+		String arg = DESKTOP;
 		
 		switch (arg) {
 		case WEBCAM:

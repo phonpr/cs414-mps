@@ -14,24 +14,32 @@ import javax.swing.JPanel;
 
 import org.gstreamer.Gst;
 
+import edu.cs414.mp3.client.controller.DesktopController;
+import edu.cs414.mp3.client.controller.WebcamController;
+
 public class ClientMain {
 
 	private JFrame frmMpClient;
 	private JPanel panel;
+	
 	private JLabel lblWebcamServer;
 	private JLabel lblDesktopServer;
 	private JButton btnWebcamPlay;
-	private JButton btnWebcamStop;
-	private JButton btnDesktopPlay;
-	private JButton btnDesktopStop;
 	private JButton btnWebcamPause;
-	private JButton btnDesktopPause;
 	private JButton btnWebcamResume;
-	private JButton btnDesktopResume;
+	private JButton btnWebcamStop;
 	private JCheckBox chckbxWebcamMute;
+	
+	private JButton btnDesktopPlay;
+	private JButton btnDesktopPause;
+	private JButton btnDesktopResume;
+	private JButton btnDesktopStop;
 	private JCheckBox chckbxDesktopMute;
 	
+	private ButtonGroup webcamButtonGroup;
 	private WebcamController webcamController;
+	
+	private ButtonGroup desktopButtonGroup;
 	private DesktopController desktopController;
 
 	/**
@@ -57,6 +65,7 @@ public class ClientMain {
 	 */
 	public ClientMain() {
 		initialize();
+		initializeButtonGroups();
 	}
 
 	/**
@@ -81,11 +90,8 @@ public class ClientMain {
 		btnWebcamPlay = new JButton("Play");
 		btnWebcamPlay.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				webcamController = new WebcamController();
+				webcamController = new WebcamController(webcamButtonGroup);
 				webcamController.onPlay();
-				btnWebcamPlay.setEnabled(false);
-				btnWebcamPause.setEnabled(true);
-				btnWebcamStop.setEnabled(true);
 			}
 		});
 		
@@ -94,35 +100,27 @@ public class ClientMain {
 			public void actionPerformed(ActionEvent arg0) {
 				if (webcamController != null) {
 					webcamController.onPause();
-					btnWebcamPause.setEnabled(false);
-					btnWebcamResume.setEnabled(true);
 				}
 			}
 		});
-		btnWebcamPause.setEnabled(false);
 		
 		btnWebcamResume = new JButton("Resume");
 		btnWebcamResume.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (webcamController != null) {
 					webcamController.onResume();
-					btnWebcamPause.setEnabled(true);
-					btnWebcamResume.setEnabled(false);
 				}
 			}
 		});
-		btnWebcamResume.setEnabled(false);
 		
 		btnWebcamStop = new JButton("Stop");
 		btnWebcamStop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (webcamController != null) {
 					webcamController.onStop();
-					resetWebcamButtons();
 				}
 			}
 		});
-		btnWebcamStop.setEnabled(false);
 		
 		chckbxWebcamMute = new JCheckBox("Mute");
 		
@@ -142,11 +140,8 @@ public class ClientMain {
 		btnDesktopPlay = new JButton("Play");
 		btnDesktopPlay.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				desktopController = new DesktopController();
+				desktopController = new DesktopController(desktopButtonGroup);
 				desktopController.onPlay();
-				btnDesktopPlay.setEnabled(false);
-				btnDesktopPause.setEnabled(true);
-				btnDesktopStop.setEnabled(true);
 			}
 		});
 		
@@ -155,8 +150,6 @@ public class ClientMain {
 			public void actionPerformed(ActionEvent e) {
 				if (desktopController != null) {
 					desktopController.onPause();
-					btnDesktopPause.setEnabled(false);
-					btnDesktopResume.setEnabled(true);
 				}
 			}
 		});
@@ -166,8 +159,6 @@ public class ClientMain {
 			public void actionPerformed(ActionEvent e) {
 				if (desktopController != null) {
 					desktopController.onResume();
-					btnDesktopPause.setEnabled(true);
-					btnDesktopResume.setEnabled(false);
 				}
 			}
 		});
@@ -177,7 +168,6 @@ public class ClientMain {
 			public void actionPerformed(ActionEvent e) {
 				if (desktopController != null) {
 					desktopController.onStop();
-					resetDesktopButtons();
 				}
 			}
 		});
@@ -190,21 +180,24 @@ public class ClientMain {
 		panelDesktop.add(btnDesktopResume);
 		panelDesktop.add(btnDesktopStop);
 		panelDesktop.add(chckbxDesktopMute);
-		
-		resetDesktopButtons();
 	}
 	
-	private void resetWebcamButtons() {
-		btnWebcamPlay.setEnabled(true);
-		btnWebcamPause.setEnabled(false);
-		btnWebcamResume.setEnabled(false);
-		btnWebcamStop.setEnabled(false);
-	}
-
-	private void resetDesktopButtons() {
-		btnDesktopPlay.setEnabled(true);
-		btnDesktopPause.setEnabled(false);
-		btnDesktopResume.setEnabled(false);
-		btnDesktopStop.setEnabled(false);
+	public void initializeButtonGroups() {
+		webcamButtonGroup = new ButtonGroup();
+		webcamButtonGroup.setBtnPlay(btnWebcamPlay);
+		webcamButtonGroup.setBtnPause(btnWebcamPause);
+		webcamButtonGroup.setBtnResume(btnWebcamResume);
+		webcamButtonGroup.setBtnStop(btnWebcamStop);
+		webcamButtonGroup.setChkMute(chckbxWebcamMute);
+		
+		desktopButtonGroup = new ButtonGroup();
+		desktopButtonGroup.setBtnPlay(btnDesktopPlay);
+		desktopButtonGroup.setBtnPause(btnDesktopPause);
+		desktopButtonGroup.setBtnResume(btnDesktopResume);
+		desktopButtonGroup.setBtnStop(btnDesktopStop);
+		desktopButtonGroup.setChkMute(chckbxDesktopMute);
+		
+		webcamButtonGroup.onReset();
+		desktopButtonGroup.onReset();
 	}
 }

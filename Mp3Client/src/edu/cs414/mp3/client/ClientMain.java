@@ -173,6 +173,13 @@ public class ClientMain {
 		});
 		
 		chckbxDesktopMute = new JCheckBox("Mute");
+		chckbxDesktopMute.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (desktopController != null) {
+					desktopController.onMute();
+				}
+			}
+		});
 
 		panelDesktop.add(lblDesktopServer);
 		panelDesktop.add(btnDesktopPlay);

@@ -20,6 +20,7 @@ public class DesktopController implements Controller, Runnable {
 	private Pipeline videoPipeline;
 	private VideoWindow videoWindow;
 	private DesktopConnection desktopConnection;
+	private Element muter;
 	
 	public DesktopController(ButtonGroup desktopButtonGroup) {
 		this.desktopButtonGroup = desktopButtonGroup;
@@ -91,6 +92,7 @@ public class DesktopController implements Controller, Runnable {
 			Element audDec = ElementFactory.make("alawdec", "auddec");
 			Element audConvert = ElementFactory.make("audioconvert", "audconvert");
 			Element audResample = ElementFactory.make("audioresample", "audresample");
+			muter = ElementFactory.make("volume", "mutecontrol");
 			Element audSink = ElementFactory.make("autoaudiosink", "audsink");
 			
 			Element audUDPSrc = ElementFactory.make("udpsrc", "audUDPsrc");
@@ -103,8 +105,8 @@ public class DesktopController implements Controller, Runnable {
 			audRTCPSink.set("host", ConnectionConfig.WEBCAM_SERVER_HOST);
 			audRTCPSink.set("port", 5007);
 			
-			videoPipeline.addMany(audUDPSrc, audRTCPSink, audRTCPSrc, audDec, audrtpdepay, audConvert, audResample, audSink, audQ);
-			audrtpdepay.link(audQ, audDec, audConvert, audResample, audSink);
+			videoPipeline.addMany(audUDPSrc, audRTCPSink, audRTCPSrc, audDec, audrtpdepay, audConvert, audResample, muter, audSink, audQ);
+			audrtpdepay.link(audQ, audDec, audConvert, audResample, muter, audSink);
 			
 			audUDPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtp_sink_1"));
 			audRTCPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtcp_sink_1"));
@@ -167,7 +169,11 @@ public class DesktopController implements Controller, Runnable {
 	public void onMute() {
 		System.out.println("[DesktopController] onMute()");
 		
-		// mute is controlled under client side
+		if((boolean) muter.get("mute")) {
+			muter.set("mute", false);
+		} else {
+			muter.set("mute", true);
+		}
 	}
 
 }

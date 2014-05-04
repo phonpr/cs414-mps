@@ -185,7 +185,7 @@ public class WebcamController implements Controller, Runnable {
 			audUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)audio, clock-rate=(int)8000, encoding-name=(string)PCMA, ssrc=(uint)3824386182, payload=(int)8, clock-base=(uint)921092443, seqnum-base=(uint)8008"));
 			audUDPSrc.set("port", ConnectionConfig.DESKTOP_AUDIO_UDP_SINK + 1000);
 			audRTCPSrc.set("port", ConnectionConfig.DESKTOP_AUDIO_RTCP_SRC + 1000);
-			audRTCPSink.set("host", ConnectionConfig.DESKTOP_SERVER_HOST + 1000);
+			audRTCPSink.set("host", ConnectionConfig.DESKTOP_SERVER_HOST);
 			audRTCPSink.set("port", ConnectionConfig.DESKTOP_AUDIO_RTCP_SINK + 1000);
 			
 			videoPipeline.addMany(audUDPSrc, audRTCPSink, audRTCPSrc, audDec, audrtpdepay, audConvert, audResample, muter, audSink, audQ);
@@ -280,11 +280,13 @@ public class WebcamController implements Controller, Runnable {
 	public void onMute() {
 		System.out.println("[WebcamController] onMute()");
 
-		if((Boolean) muter.get("mute")) {
-			muter.set("mute", false);
-		} else {
-			muter.set("mute", true);
-		}
+		if (webcamConnection.isHdMode()) {
+			if((boolean) muter.get("mute")) {
+				muter.set("mute", false);
+			} else {
+				muter.set("mute", true);
+			}
+		}	
 	}
 
 	@Override

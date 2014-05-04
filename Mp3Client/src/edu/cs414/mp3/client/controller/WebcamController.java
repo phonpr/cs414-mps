@@ -32,7 +32,7 @@ public class WebcamController implements Controller, Runnable {
 		}
 		else {
 			webcamButtonGroup.onPlay();
-			ResourceManager.setWebcamConnection(webcamConnection);
+			ClientResourceManager.setWebcamConnection(webcamConnection);
 		}
 
 		videoPipeline = new Pipeline("VideoTest");
@@ -140,7 +140,7 @@ public class WebcamController implements Controller, Runnable {
 		
 		if (webcamConnection.onStop()) {
 			videoPipeline.setState(State.NULL);
-			ResourceManager.setWebcamConnection(null);
+			ClientResourceManager.setWebcamConnection(null);
 		}
 	}
 

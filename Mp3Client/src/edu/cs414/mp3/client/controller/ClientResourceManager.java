@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 import edu.cs414.mp3.client.connection.DesktopConnection;
 import edu.cs414.mp3.client.connection.WebcamConnection;
 
-public class ResourceManager {
+public class ClientResourceManager {
 	private static long currentResource = 0;
 	private static boolean running = false;
 	
@@ -25,7 +25,7 @@ public class ResourceManager {
 				long newResource = Long.parseLong(readFile("resource.txt"));
 				
 				if (currentResource != newResource) {
-					System.out.println("[ResourceManager] resource changed from " + currentResource + " => " + newResource);
+					System.out.println("[ClientResourceManager] resource changed from " + currentResource + " => " + newResource);
 					currentResource = newResource;
 					changed = true;
 				}
@@ -34,12 +34,12 @@ public class ResourceManager {
 				}
 				
 				if (desktopConnection != null && changed) {
-					System.out.println("[ResourceManager] update resource to Desktop Server : " + currentResource);
+					System.out.println("[ClientResourceManager] update resource to Desktop Server : " + currentResource);
 					desktopConnection.onClientResourceChanged(currentResource);
 				}
 				
 				if (webcamConnection != null && changed) {
-					System.out.println("[ResourceManager] update resource to Webcam Server : " + currentResource);
+					System.out.println("[ClientResourceManager] update resource to Webcam Server : " + currentResource);
 					webcamConnection.onClientResourceChanged(currentResource);
 				}
 				
@@ -56,17 +56,17 @@ public class ResourceManager {
 	private static ResourceManagerThread resourceRunnable;
 
 	public static void start() {
-		resourceRunnable = new ResourceManager().new ResourceManagerThread();
+		resourceRunnable = new ClientResourceManager().new ResourceManagerThread();
 		running = true;
 		new Thread(resourceRunnable).start();
 	}
 
 	public static void setDesktopConnection(DesktopConnection desktopConnection) {
-		ResourceManager.desktopConnection = desktopConnection;
+		ClientResourceManager.desktopConnection = desktopConnection;
 	}
 
 	public static void setWebcamConnection(WebcamConnection webcamConnection) {
-		ResourceManager.webcamConnection = webcamConnection;
+		ClientResourceManager.webcamConnection = webcamConnection;
 	}
 	
 	private static String readFile(String file) {

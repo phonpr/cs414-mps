@@ -1,5 +1,6 @@
 package edu.cs414.mp3.client.controller;
 
+import edu.cs414.mp3.common.ConnectionConfig;
 import org.gstreamer.*;
 
 import edu.cs414.mp3.client.ButtonGroup;
@@ -15,6 +16,8 @@ public class WebcamController implements Controller, Runnable {
 	private Pipeline videoPipeline;
 	private VideoWindow videoWindow;
 	private WebcamConnection webcamConnection;
+
+	private Element muter;
 	
 	public WebcamController(ButtonGroup webcamButtonGroup) {
 		this.webcamButtonGroup = webcamButtonGroup;
@@ -22,8 +25,6 @@ public class WebcamController implements Controller, Runnable {
 
 	@Override
 	public void run() {
-		videoPipeline = new Pipeline();
-
 		// connect to server and start playing
 		webcamConnection = new WebcamConnection();
 		if (!webcamConnection.onPlay()) {
@@ -34,49 +35,34 @@ public class WebcamController implements Controller, Runnable {
 			ResourceManager.setWebcamConnection(webcamConnection);
 		}
 
-		videoWindow.setVisible(true);
+		videoPipeline = new Pipeline("VideoTest");
+		boolean passive = false;
 
 		final Element vidrtpdepay = ElementFactory.make("rtpjpegdepay", "viddepay");
-		final Element audrtpdepay = ElementFactory.make("rtppcmadepay", "auddepay");
+		final Element audrtpdepay = ElementFactory.make("rtppcmadepay", "auddepay");;
+
+		Element vidQ = ElementFactory.make("queue", "vidQ");
 
 		Element viddecode = ElementFactory.make("jpegdec", "viddec");
 		Element colorspace = ElementFactory.make("ffmpegcolorspace", "colorspace");
-
-		Element audDec = ElementFactory.make("alawdec", "auddec");
-		Element audConvert = ElementFactory.make("audioconvert", "audconvert");
-		Element audResample = ElementFactory.make("audioresample", "audresample");
-		Element audSink = ElementFactory.make("alsasink", "audsink");
-
-		Element vidQ = ElementFactory.make("queue", "vidQ");
-		Element audQ = ElementFactory.make("queue", "audQ");
 
 		Element vidUDPSrc = ElementFactory.make("udpsrc", "vidUDPsrc");
 		Element vidRTCPSink = ElementFactory.make("udpsink", "vidRTCPsink");
 		Element vidRTCPSrc = ElementFactory.make("udpsrc", "vidRTCPsrc");
 
-		Element audUDPSrc = ElementFactory.make("udpsrc", "audUDPsrc");
-		Element audRTCPSink = ElementFactory.make("udpsink", "audRTCPsink");
-		Element audRTCPSrc = ElementFactory.make("udpsrc", "audRTCPsrc");
-
 		vidUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)JPEG, ssrc=(uint)2934514725, payload=(int)96, clock-base=(uint)2718573098, seqnum-base=(uint)11320"));
-		vidUDPSrc.set("port", 6000);
-		vidRTCPSrc.set("port", 6001);
-		vidRTCPSink.set("host", "localhost");
-		vidRTCPSink.set("port", 6005);
-
-		audUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)audio, clock-rate=(int)8000, encoding-name=(string)PCMA, ssrc=(uint)3824386182, payload=(int)8, clock-base=(uint)921092443, seqnum-base=(uint)8008"));
-		audUDPSrc.set("port", 6002);
-		audRTCPSrc.set("port", 6003);
-		audRTCPSink.set("host", "localhost");
-		audRTCPSink.set("port", 5007);
+		vidUDPSrc.set("port", ConnectionConfig.DESKTOP_VIDEO_UDP_SINK + 1000);
+		vidRTCPSrc.set("port", ConnectionConfig.DESKTOP_VIDEO_RTCP_SRC + 1000);
+		vidRTCPSink.set("host", ConnectionConfig.DESKTOP_SERVER_HOST + 1000);
+		vidRTCPSink.set("port", ConnectionConfig.DESKTOP_VIDEO_RTCP_SINK + 1000);
 
 		final Element videoElement = videoWindow.getVideoComponent().getElement();
 
 		RTPBin rtp = new RTPBin("rtp");
 
-		videoPipeline.addMany(vidUDPSrc, vidRTCPSink, vidRTCPSrc, audUDPSrc, audRTCPSink, audRTCPSrc, rtp, audDec, vidrtpdepay, viddecode, colorspace, vidQ, videoElement, audrtpdepay, audConvert, audResample, audSink, audQ);
+		videoPipeline.add(rtp);
+		videoPipeline.addMany(vidUDPSrc, vidRTCPSink, vidRTCPSrc, vidrtpdepay, viddecode, colorspace, vidQ, videoElement);
 		vidrtpdepay.link(viddecode, vidQ, colorspace, videoElement);
-		audrtpdepay.link(audQ, audDec, audConvert, audResample, audSink);
 
 		rtp.connect(new Element.PAD_ADDED() {
 			public void padAdded(Element element, Pad pad) {
@@ -96,18 +82,40 @@ public class WebcamController implements Controller, Runnable {
 		vidRTCPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtcp_sink_0"));
 		rtp.getRequestPad("send_rtcp_src_0").link(vidRTCPSink.getStaticPad("sink"));
 
-		audUDPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtp_sink_1"));
-		audRTCPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtcp_sink_1"));
-		rtp.getRequestPad("send_rtcp_src_1").link(audRTCPSink.getStaticPad("sink"));
-
-		audRTCPSink.set("sync", false); audRTCPSink.set("async", false);
 		vidRTCPSink.set("sync", false); vidRTCPSink.set("async", false);
 
-		System.out.println(rtp.getSources());
-		System.out.println(rtp.getPads());
+		if (!passive) {
+			Element audQ = ElementFactory.make("queue", "audQ");
+
+			Element audDec = ElementFactory.make("alawdec", "auddec");
+			Element audConvert = ElementFactory.make("audioconvert", "audconvert");
+			Element audResample = ElementFactory.make("audioresample", "audresample");
+			muter = ElementFactory.make("volume", "mutecontrol");
+			Element audSink = ElementFactory.make("autoaudiosink", "audsink");
+
+			Element audUDPSrc = ElementFactory.make("udpsrc", "audUDPsrc");
+			Element audRTCPSink = ElementFactory.make("udpsink", "audRTCPsink");
+			Element audRTCPSrc = ElementFactory.make("udpsrc", "audRTCPsrc");
+
+			audUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)audio, clock-rate=(int)8000, encoding-name=(string)PCMA, ssrc=(uint)3824386182, payload=(int)8, clock-base=(uint)921092443, seqnum-base=(uint)8008"));
+			audUDPSrc.set("port", ConnectionConfig.DESKTOP_AUDIO_UDP_SINK);
+			audRTCPSrc.set("port", ConnectionConfig.DESKTOP_AUDIO_RTCP_SRC);
+			audRTCPSink.set("host", ConnectionConfig.DESKTOP_SERVER_HOST);
+			audRTCPSink.set("port", ConnectionConfig.DESKTOP_AUDIO_RTCP_SINK);
+
+			videoPipeline.addMany(audUDPSrc, audRTCPSink, audRTCPSrc, audDec, audrtpdepay, audConvert, audResample, muter, audSink, audQ);
+			audrtpdepay.link(audQ, audDec, audConvert, audResample, muter, audSink);
+
+			audUDPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtp_sink_1"));
+			audRTCPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtcp_sink_1"));
+			rtp.getRequestPad("send_rtcp_src_1").link(audRTCPSink.getStaticPad("sink"));
+
+			audRTCPSink.set("sync", false); audRTCPSink.set("async", false);
+		}
 
 		videoPipeline.setState(State.READY);
 		videoPipeline.setState(State.PLAYING);
+		videoWindow.setVisible(true);
 	}
 
 	@Override
@@ -159,8 +167,12 @@ public class WebcamController implements Controller, Runnable {
 	@Override
 	public void onMute() {
 		System.out.println("[WebcamController] onMute()");
-		
-		// mute is controlled under client side
+
+		if((Boolean) muter.get("mute")) {
+			muter.set("mute", false);
+		} else {
+			muter.set("mute", true);
+		}
 	}
 
 	@Override

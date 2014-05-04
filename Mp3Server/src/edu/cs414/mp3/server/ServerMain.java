@@ -11,8 +11,6 @@ import edu.cs414.mp3.common.ConnectionConfig;
 import edu.cs414.mp3.server.connection.ConnectionControl;
 import edu.cs414.mp3.server.connection.DesktopConnectionControl;
 import edu.cs414.mp3.server.connection.WebcamConnectionControl;
-import edu.cs414.mp3.server.streamer.DesktopStreamer;
-import edu.cs414.mp3.server.streamer.WebcamStreamer;
 
 public class ServerMain {
 	private static final String WEBCAM	= "webcam";

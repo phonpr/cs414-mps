@@ -6,4 +6,5 @@ public interface Controller {
 	public void onPause();
 	public void onResume();
 	public void onMute();
+	public void onToggleHdMode();
 }

@@ -12,16 +12,22 @@ import org.gstreamer.elements.good.RTPBin;
 import edu.cs414.mp3.common.ConnectionConfig;
 
 public class DesktopStreamer implements Runnable {
-
+	private String hostAddress;
+	private boolean isPassive;
+	private int framerate;
+	
+	public void init(String hostname) {
+		hostAddress = hostname;
+		isPassive = false;
+		framerate = 10;
+	}
+	
 	@Override
 	public void run() {
-		boolean passive = false;
-		int framerate = 25;
-		String hostAddress = "localhost";
 		
 		Element videoSrc = ElementFactory.make("ximagesrc", "vidsrc");
 		
-		if (passive) {
+		if (isPassive) {
 			videoSrc.set("endx", 319);
 			videoSrc.set("endy", 239);	
 		} else {
@@ -40,7 +46,7 @@ public class DesktopStreamer implements Runnable {
 		Element vidColor = ElementFactory.make("ffmpegcolorspace", "colorspace");
 		Element vidEnc = ElementFactory.make("jpegenc", "stupidenc");
 		
-		if (passive) {
+		if (isPassive) {
 			vidRate.set("max-rate", 10);
 		} else {
 			vidRate.set("max-rate", framerate);
@@ -72,7 +78,7 @@ public class DesktopStreamer implements Runnable {
 
 		vidRTCPSink.set("sync", false); vidRTCPSink.set("async", false);
 
-		if (!passive) {
+		if (!isPassive) {
 
 			Element audioSrc = ElementFactory.make("alsasrc", "soundsrc");
 

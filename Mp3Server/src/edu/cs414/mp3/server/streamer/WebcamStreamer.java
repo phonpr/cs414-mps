@@ -3,21 +3,24 @@ package edu.cs414.mp3.server.streamer;
 import org.gstreamer.*;
 import org.gstreamer.elements.good.RTPBin;
 
-public class WebcamStreamer implements Runnable {
+public class WebcamStreamer extends Streamer {
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
-		int isActiveMode = 1;
-		int framerate = 20;
+		int isActiveMode = 0;
+		int framerate = 10;
 
 		createPipeline(framerate, isActiveMode);
 
 		play();
 	}
+	
+	public void init(String host) {
+		hostAddress = host;
+	}
 
 	private Pipeline pipe = new Pipeline();
-	private String hostAddress = "localhost";
+	private String hostAddress;
 
 	public void createPipeline(int framerate, int isActiveMode) {
 		/* Record pipeline:

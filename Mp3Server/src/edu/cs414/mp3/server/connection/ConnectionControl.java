@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 import edu.cs414.mp3.common.ConnectionProtocol;
+import edu.cs414.mp3.server.ServerResourceManager;
 import edu.cs414.mp3.server.streamer.Streamer;
 
 public abstract class ConnectionControl implements Runnable {
@@ -57,6 +58,9 @@ public abstract class ConnectionControl implements Runnable {
 		case ConnectionProtocol.CMD_PLAY:
 			streamer.init(clientSocket.getInetAddress().getHostName());
 			new Thread(streamer).start();
+			
+			// set the streamer to communicate with resource manager
+			ServerResourceManager.setStreamer(streamer);
 			sendResult(ConnectionProtocol.RESULT_SUCCESS);
 			break;
 		case ConnectionProtocol.CMD_PAUSE:
@@ -66,6 +70,9 @@ public abstract class ConnectionControl implements Runnable {
 			sendResult(ConnectionProtocol.RESULT_SUCCESS);
 			break;
 		case ConnectionProtocol.CMD_STOP:
+			
+			// reset the streamer
+			ServerResourceManager.setStreamer(null);
 			sendResult(ConnectionProtocol.RESULT_SUCCESS);
 			break;
 		default:

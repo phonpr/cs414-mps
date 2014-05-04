@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 import org.gstreamer.Gst;
 
 import edu.cs414.mp3.client.controller.DesktopController;
-import edu.cs414.mp3.client.controller.ResourceManager;
+import edu.cs414.mp3.client.controller.ClientResourceManager;
 import edu.cs414.mp3.client.controller.WebcamController;
 
 public class ClientMain {
@@ -70,7 +70,7 @@ public class ClientMain {
 		initialize();
 		initializeButtonGroups();
 		
-		ResourceManager.start();
+		ClientResourceManager.start();
 	}
 
 	/**

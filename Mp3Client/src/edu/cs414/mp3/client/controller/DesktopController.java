@@ -123,7 +123,7 @@ public class DesktopController implements Controller, Runnable {
 		}
 		else {
 			desktopButtonGroup.onPlay();
-			ResourceManager.setDesktopConnection(desktopConnection);
+			ClientResourceManager.setDesktopConnection(desktopConnection);
 		}
 		passive = true;
 		
@@ -156,7 +156,7 @@ public class DesktopController implements Controller, Runnable {
 		
 		if (desktopConnection.onStop()) {
 			videoPipeline.setState(State.NULL);
-			ResourceManager.setDesktopConnection(null);
+			ClientResourceManager.setDesktopConnection(null);
 		}
 	}
 

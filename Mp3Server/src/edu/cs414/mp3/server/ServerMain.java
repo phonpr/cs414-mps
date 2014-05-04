@@ -23,6 +23,8 @@ public class ServerMain {
 		String arg = WEBCAM;
 //		String arg = DESKTOP;
 		
+		ServerResourceManager.start();
+		
 		switch (arg) {
 		case WEBCAM:
 			System.out.println("[ServerMain] Starting Webcam Streaming Server...");

@@ -20,7 +20,11 @@ public class Streamer implements Runnable {
 	}
 	
 	
-	public void init(String host){};
+	public void init(String host){}
+
+	public void onServerResourceChanged(long currentResource) {
+		
+	};
 	
 
 }

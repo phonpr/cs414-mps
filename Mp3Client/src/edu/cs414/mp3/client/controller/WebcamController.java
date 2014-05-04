@@ -121,6 +121,7 @@ public class WebcamController implements Controller, Runnable {
 		}
 		else {
 			webcamButtonGroup.onPlay();
+			ClientResourceManager.setWebcamConnection(webcamConnection);
 		}
 
 		passive = true;
@@ -153,7 +154,7 @@ public class WebcamController implements Controller, Runnable {
 		
 		if (webcamConnection.onStop()) {
 			videoPipeline.setState(State.NULL);
-			ResourceManager.setWebcamConnection(null);
+			ClientResourceManager.setWebcamConnection(null);
 		}
 	}
 

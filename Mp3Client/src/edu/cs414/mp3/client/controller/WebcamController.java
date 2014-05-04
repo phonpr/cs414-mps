@@ -57,14 +57,14 @@ public class WebcamController implements Controller, Runnable {
 		Element audRTCPSrc = ElementFactory.make("udpsrc", "audRTCPsrc");
 
 		vidUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)JPEG, ssrc=(uint)2934514725, payload=(int)96, clock-base=(uint)2718573098, seqnum-base=(uint)11320"));
-		vidUDPSrc.set("port", 5000);
-		vidRTCPSrc.set("port", 5001);
+		vidUDPSrc.set("port", 6000);
+		vidRTCPSrc.set("port", 6001);
 		vidRTCPSink.set("host", "localhost");
-		vidRTCPSink.set("port", 5005);
+		vidRTCPSink.set("port", 6005);
 
 		audUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)audio, clock-rate=(int)8000, encoding-name=(string)PCMA, ssrc=(uint)3824386182, payload=(int)8, clock-base=(uint)921092443, seqnum-base=(uint)8008"));
-		audUDPSrc.set("port", 5002);
-		audRTCPSrc.set("port", 5003);
+		audUDPSrc.set("port", 6002);
+		audRTCPSrc.set("port", 6003);
 		audRTCPSink.set("host", "localhost");
 		audRTCPSink.set("port", 5007);
 

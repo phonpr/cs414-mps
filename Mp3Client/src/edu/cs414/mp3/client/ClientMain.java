@@ -17,6 +17,7 @@ import org.gstreamer.Gst;
 import edu.cs414.mp3.client.controller.DesktopController;
 import edu.cs414.mp3.client.controller.ClientResourceManager;
 import edu.cs414.mp3.client.controller.WebcamController;
+import edu.cs414.mp3.common.ConnectionConfig;
 
 public class ClientMain {
 
@@ -49,8 +50,19 @@ public class ClientMain {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		Gst.init("Client Main", args);
-
+		if (args.length < 2) {
+			System.out.println("Usage: java -jar client.jar <webcam_server_host> <desktop_server_host>");
+			return;
+		}
+		
+		System.out.println("[ClientMain] Setting Webcam Server : " + args[0]);
+		ConnectionConfig.setWebcamServerHost(args[0]);
+		
+		System.out.println("[ClientMain] Setting Desktop Server : " + args[1]);
+		ConnectionConfig.setWebcamServerHost(args[1]);
+		
+		Gst.init();
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {

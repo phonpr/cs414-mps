@@ -19,9 +19,13 @@ public class ServerMain {
 	private static boolean serverRunning = true;
 
 	public static void main(String[] args) {
+		if (args.length < 1) {
+			System.out.println("Usage: java -jar server.jar <desktop | webcam>");
+			return;
+		}
+		
 		Gst.init();
-		String arg = WEBCAM;
-//		String arg = DESKTOP;
+		String arg = args[0];
 		
 		ServerResourceManager.start();
 		

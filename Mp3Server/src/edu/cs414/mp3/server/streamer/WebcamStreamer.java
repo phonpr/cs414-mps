@@ -20,6 +20,7 @@ public class WebcamStreamer extends Streamer {
 	}
 
 	private String hostAddress;
+	private Element vidRate;
 
 	public void createPipeline(int isActiveMode, int framerate) {
 		/* Record pipeline:
@@ -68,7 +69,7 @@ public class WebcamStreamer extends Streamer {
 		Element audioEnc = ElementFactory.make("alawenc", "soundEncoder");
 		Element videosink = ElementFactory.make("xvimagesink", "videoSink");
 
-		Element vidRate = ElementFactory.make("videorate", "ratechange");
+		vidRate = ElementFactory.make("videorate", "ratechange");
 		if(isActiveMode == 1) {
 			vidRate.set("max-rate", framerate);
 		}
@@ -187,5 +188,9 @@ public class WebcamStreamer extends Streamer {
 		else {
 			pipe.setState(State.PAUSED);
 		}
+	}
+	
+	public void changeFramerate(int frames) {
+		vidRate.set("max-rate", frames);
 	}
 }

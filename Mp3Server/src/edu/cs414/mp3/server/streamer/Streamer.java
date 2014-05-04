@@ -24,8 +24,12 @@ public class Streamer implements Runnable {
 	
 	
 	public void init(String host){}
+	
+	public void changeFramerate(int frames){}
 
 	public void onServerResourceChanged(long currentResource) {
+		int newFramerate = calcFramerate(currentResource, 0);
+		changeFramerate(newFramerate);
 	}
 
 	public void onStop() {
@@ -33,7 +37,7 @@ public class Streamer implements Runnable {
 		pipe.dispose();
 	};
 	
-	protected int calcFramerate(int band, int size) {
+	protected int calcFramerate(long band, int size) {
 		int vidband = 0;
 		if (size == 1)
 			vidband = VIDEO_BANDWIDTH_L;
@@ -41,11 +45,11 @@ public class Streamer implements Runnable {
 			vidband = VIDEO_BANDWIDTH_S;
 		
 		// (availiable - audio) / video gives frames/sec
-		int framerate = (band - AUDIO_BANDWIDTH) / vidband;
+		int framerate = (int) ((band - AUDIO_BANDWIDTH) / vidband);
 		if (framerate >= 25)
 			return 25;
 		else if (framerate <= 15)
-			return -1;
+			return 15;
 		else
 			return framerate;
 	}

@@ -13,6 +13,7 @@ import edu.cs414.mp3.common.ConnectionConfig;
 
 public class DesktopStreamer extends Streamer {
 	private String hostAddress;
+	private Element vidRate;
 	
 	public void init(String hostname) {
 		hostAddress = hostname;
@@ -37,7 +38,7 @@ public class DesktopStreamer extends Streamer {
         Element videofilter2 = ElementFactory.make("capsfilter", "flt2");
         videofilter2.setCaps(Caps.fromString("video/x-raw-yuv"));
 
-		Element vidRate = ElementFactory.make("videorate", "ratechange");
+        vidRate = ElementFactory.make("videorate", "ratechange");
 		Element vidColor = ElementFactory.make("ffmpegcolorspace", "colorspace");
 		Element vidEnc = ElementFactory.make("jpegenc", "stupidenc");
 		
@@ -126,5 +127,9 @@ public class DesktopStreamer extends Streamer {
 		
 		pipe.setState(State.READY);
 		pipe.setState(State.PLAYING);
+	}
+	
+	public void changeFramerate(int frames) {
+		vidRate.set("max-rate", frames);
 	}
 }

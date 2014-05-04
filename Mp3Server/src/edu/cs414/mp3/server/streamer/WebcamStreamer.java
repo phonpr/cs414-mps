@@ -85,19 +85,19 @@ public class WebcamStreamer extends Streamer {
 
 		Element vidRTCPSink = ElementFactory.make("udpsink", "vidrtcpsink");
 		vidUDPSink.set("host", hostAddress);
-		vidUDPSink.set("port", 5000);
-		vidRTCPSrc.set("port", 5005);
+		vidUDPSink.set("port", 6000);
+		vidRTCPSrc.set("port", 6005);
 		vidRTCPSink.set("host", hostAddress);
-		vidRTCPSink.set("port", 5001);
+		vidRTCPSink.set("port", 6001);
 
 		Element audUDPSink = ElementFactory.make("udpsink", "aududpsink");
 		Element audRTCPSrc = ElementFactory.make("udpsrc", "audrtcpsrc");
 		Element audRTCPSink = ElementFactory.make("udpsink", "audrtcpsink");
 		audUDPSink.set("host", hostAddress);
-		audUDPSink.set("port", 5002);
-		audRTCPSrc.set("port", 5007);
+		audUDPSink.set("port", 6002);
+		audRTCPSrc.set("port", 6007);
 		audRTCPSink.set("host", hostAddress);
-		audRTCPSink.set("port", 5003);
+		audRTCPSink.set("port", 6003);
 
 
 		final Element videoQ = ElementFactory.make("queue", "videoQ");

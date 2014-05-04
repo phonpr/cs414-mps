@@ -15,7 +15,7 @@ public abstract class Connection {
 	private PrintWriter writer;
 	private BufferedReader reader;
 	
-	private boolean isHdMode = true;
+	private boolean isHdMode = false;
 	
 	public boolean onPlay(String hostName, int port) {
 		
@@ -106,5 +106,9 @@ public abstract class Connection {
 	
 	public boolean isHdMode() {
 		return isHdMode;
+	}
+	
+	public void forceHdMode() {
+		isHdMode = true;
 	}
 }

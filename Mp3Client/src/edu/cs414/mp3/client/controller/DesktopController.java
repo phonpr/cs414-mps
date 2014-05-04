@@ -213,6 +213,7 @@ public class DesktopController implements Controller, Runnable {
 			ClientResourceManager.setDesktopConnection(desktopConnection);
 		}
 		passive = false;
+		desktopConnection.forceHdMode();
 		
 		buildPipeline();
 		

@@ -109,7 +109,7 @@ public class DesktopStreamer extends Streamer {
 	
 	@Override
 	public void run() {
-		buildPipeline(0, 10);
+		buildPipeline(1, 30);
 		
 		pipe.setState(State.READY);
 		pipe.setState(State.PLAYING);

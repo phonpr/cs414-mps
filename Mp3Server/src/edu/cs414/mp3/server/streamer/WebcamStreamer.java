@@ -189,6 +189,4 @@ public class WebcamStreamer extends Streamer {
 			pipe.setState(State.PAUSED);
 		}
 	}
-
-
 }

@@ -70,6 +70,8 @@ public abstract class ConnectionControl implements Runnable {
 			sendResult(ConnectionProtocol.RESULT_SUCCESS);
 			break;
 		case ConnectionProtocol.CMD_STOP:
+			connectionControlRunning = false;
+			streamer.onStop();
 			
 			// reset the streamer
 			ServerResourceManager.setStreamer(null);

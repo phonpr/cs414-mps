@@ -24,6 +24,11 @@ public class Streamer implements Runnable {
 
 	public void onServerResourceChanged(long currentResource) {
 		
+	}
+
+	public void onStop() {
+		pipe.setState(State.NULL);
+		pipe.dispose();
 	};
 	
 

@@ -43,7 +43,7 @@ public class WebcamController implements Controller, Runnable {
 		vidUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)JPEG, ssrc=(uint)2934514725, payload=(int)96, clock-base=(uint)2718573098, seqnum-base=(uint)11320"));
 		vidUDPSrc.set("port", ConnectionConfig.DESKTOP_VIDEO_UDP_SINK + 1000);
 		vidRTCPSrc.set("port", ConnectionConfig.DESKTOP_VIDEO_RTCP_SRC + 1000);
-		vidRTCPSink.set("host", ConnectionConfig.DESKTOP_SERVER_HOST + 1000);
+		vidRTCPSink.set("host", ConnectionConfig.DESKTOP_SERVER_HOST);
 		vidRTCPSink.set("port", ConnectionConfig.DESKTOP_VIDEO_RTCP_SINK + 1000);
 
 		final Element videoElement = videoWindow.getVideoComponent().getElement();
@@ -90,7 +90,7 @@ public class WebcamController implements Controller, Runnable {
 			audUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)audio, clock-rate=(int)8000, encoding-name=(string)PCMA, ssrc=(uint)3824386182, payload=(int)8, clock-base=(uint)921092443, seqnum-base=(uint)8008"));
 			audUDPSrc.set("port", ConnectionConfig.DESKTOP_AUDIO_UDP_SINK + 1000);
 			audRTCPSrc.set("port", ConnectionConfig.DESKTOP_AUDIO_RTCP_SRC + 1000);
-			audRTCPSink.set("host", ConnectionConfig.DESKTOP_SERVER_HOST + 1000);
+			audRTCPSink.set("host", ConnectionConfig.DESKTOP_SERVER_HOST);
 			audRTCPSink.set("port", ConnectionConfig.DESKTOP_AUDIO_RTCP_SINK + 1000);
 			
 			videoPipeline.addMany(audUDPSrc, audRTCPSink, audRTCPSrc, audDec, audrtpdepay, audConvert, audResample, muter, audSink, audQ);

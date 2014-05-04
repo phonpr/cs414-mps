@@ -59,6 +59,7 @@ public class DesktopController implements Controller, Runnable {
 		rtp.connect(new Element.PAD_ADDED() {
 			public void padAdded(Element element, Pad pad) {
 				System.out.println("pad added");
+				System.out.println(pad.getName());
 				if (pad.getName().startsWith("recv_rtp_src_1")) {
 					System.out.println("audio added");
 					pad.link(audrtpdepay.getStaticPad("sink"));

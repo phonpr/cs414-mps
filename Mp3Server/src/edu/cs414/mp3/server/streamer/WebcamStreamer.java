@@ -42,7 +42,6 @@ public class WebcamStreamer extends Streamer {
 
 		pipe = new Pipeline();
 		
-		isActiveMode = 1;
 
 		/* All of this stuff is from the RecordController from MP1 */
 		final Element videoSrc = ElementFactory.make("v4l2src", "source");

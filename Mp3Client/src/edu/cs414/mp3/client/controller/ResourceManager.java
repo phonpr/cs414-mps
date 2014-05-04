@@ -23,19 +23,23 @@ public class ResourceManager {
 			
 			while (running) {
 				long newResource = Long.parseLong(readFile("resource.txt"));
-				System.out.println("[ResourceManager] reading resource : " + newResource);
 				
 				if (currentResource != newResource) {
 					System.out.println("[ResourceManager] resource changed from " + currentResource + " => " + newResource);
 					currentResource = newResource;
 					changed = true;
 				}
+				else {
+					changed = false;
+				}
 				
 				if (desktopConnection != null && changed) {
+					System.out.println("[ResourceManager] update resource to Desktop Server : " + currentResource);
 					desktopConnection.onClientResourceChanged(currentResource);
 				}
 				
 				if (webcamConnection != null && changed) {
+					System.out.println("[ResourceManager] update resource to Webcam Server : " + currentResource);
 					webcamConnection.onClientResourceChanged(currentResource);
 				}
 				

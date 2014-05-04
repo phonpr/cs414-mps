@@ -69,6 +69,15 @@ public abstract class ConnectionControl implements Runnable {
 			sendResult(ConnectionProtocol.RESULT_SUCCESS);
 			break;
 		default:
+			if (command.startsWith(ConnectionProtocol.CMD_RESOURCE_CHANGED)) {
+				String param = command.substring(ConnectionProtocol.CMD_RESOURCE_CHANGED.length());
+				long newResource = Long.parseLong(param);
+				sendResult(ConnectionProtocol.RESULT_SUCCESS);
+				
+				System.out.println("[ConnectionControl] Client resource changed : " + newResource);
+				break;
+			}
+			
 			onReceiveExtendedCommand(command);
 			break;
 		}

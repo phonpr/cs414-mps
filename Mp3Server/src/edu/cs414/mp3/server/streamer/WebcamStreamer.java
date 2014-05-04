@@ -21,7 +21,7 @@ public class WebcamStreamer extends Streamer {
 
 	private String hostAddress;
 
-	public void createPipeline(int framerate, int isActiveMode) {
+	public void createPipeline(int isActiveMode, int framerate) {
 		/* Record pipeline:
 		gst-launch-0.10 v4l2src ! videorate ! video/x-raw-yuv,width=640,height=480,framerate=20/1 !
 		queue ! jpegenc ! queue ! mux. autoaudiosrc  ! audioconvert !

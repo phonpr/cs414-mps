@@ -1,7 +1,6 @@
 package edu.cs414.mp3.server.connection;
 
 import edu.cs414.mp3.common.ConnectionProtocol;
-import edu.cs414.mp3.server.streamer.DesktopStreamer;
 import edu.cs414.mp3.server.streamer.WebcamStreamer;
 
 public class WebcamConnectionControl extends ConnectionControl {

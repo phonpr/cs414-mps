@@ -203,7 +203,7 @@ public class ClientMain {
 			}
 		});
 		
-		chckbxDesktopHd = new JCheckBox("HD");
+		chckbxDesktopHd = new JCheckBox("HD", true);
 		chckbxDesktopHd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (desktopController != null) {

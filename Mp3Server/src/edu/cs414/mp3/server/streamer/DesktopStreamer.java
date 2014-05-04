@@ -127,5 +127,4 @@ public class DesktopStreamer extends Streamer {
 		pipe.setState(State.READY);
 		pipe.setState(State.PLAYING);
 	}
-
 }

@@ -14,7 +14,13 @@ public abstract class ConnectionControl implements Runnable {
 	private PrintWriter writer;
 	private BufferedReader reader;
 	
+	private Runnable streamer;
+	
 	private boolean connectionControlRunning = false;
+	
+	public ConnectionControl(Runnable streamer) {
+		this.streamer = streamer;
+	}
 
 	public void initialize(Socket clientSocket) {
 		this.clientSocket = clientSocket;
@@ -48,6 +54,7 @@ public abstract class ConnectionControl implements Runnable {
 	private void onReceiveCommand(String command) {
 		switch (command) {
 		case ConnectionProtocol.CMD_PLAY:
+			new Thread(streamer).start();
 			sendResult(ConnectionProtocol.RESULT_SUCCESS);
 			break;
 		case ConnectionProtocol.CMD_PAUSE:

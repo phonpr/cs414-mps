@@ -125,7 +125,8 @@ public class DesktopController implements Controller, Runnable {
 			desktopButtonGroup.onPlay();
 			ResourceManager.setDesktopConnection(desktopConnection);
 		}
-
+		passive = true;
+		
 		buildPipeline();
 		
 		videoPipeline.setState(State.READY);
@@ -139,8 +140,6 @@ public class DesktopController implements Controller, Runnable {
 		
 		videoWindow = new VideoWindow();
 		videoWindow.initializeComponents();
-		
-		passive = true;
 		
 		// this will start connection to the server, and play right away
 		new Thread(this).start();
@@ -184,12 +183,13 @@ public class DesktopController implements Controller, Runnable {
 	@Override
 	public void onMute() {
 		System.out.println("[DesktopController] onMute()");
-		
-		if((boolean) muter.get("mute")) {
-			muter.set("mute", false);
-		} else {
-			muter.set("mute", true);
-		}
+		if (desktopConnection.isHdMode()) {
+			if((boolean) muter.get("mute")) {
+				muter.set("mute", false);
+			} else {
+				muter.set("mute", true);
+			}
+		}	
 	}
 
 	@Override
@@ -199,7 +199,7 @@ public class DesktopController implements Controller, Runnable {
 		if (desktopConnection.isHdMode()) {
 			if (desktopConnection.onSdMode()) {
 				tearDown();
-				passive = false;
+				passive = true;
 				buildPipeline();
 				
 				videoPipeline.setState(State.READY);
@@ -210,7 +210,7 @@ public class DesktopController implements Controller, Runnable {
 			// currently SD mode
 			if (desktopConnection.onHdMode()) {
 				tearDown();
-				passive = true;
+				passive = false;
 				buildPipeline();
 				
 				videoPipeline.setState(State.READY);

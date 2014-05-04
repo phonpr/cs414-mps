@@ -181,11 +181,13 @@ public class WebcamController implements Controller, Runnable {
 	public void onMute() {
 		System.out.println("[WebcamController] onMute()");
 
-		if((Boolean) muter.get("mute")) {
-			muter.set("mute", false);
-		} else {
-			muter.set("mute", true);
-		}
+		if (webcamConnection.isHdMode()) {
+			if((boolean) muter.get("mute")) {
+				muter.set("mute", false);
+			} else {
+				muter.set("mute", true);
+			}
+		}	
 	}
 
 	@Override

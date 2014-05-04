@@ -63,6 +63,18 @@ public class ButtonGroup {
 		chkHdMode.setSelected(false);
 	}
 	
+	public void onPlay(boolean desktop) {
+		btnPlay.setEnabled(false);
+		btnPause.setEnabled(true);
+		btnResume.setEnabled(false);
+		btnStop.setEnabled(true);
+		chkMute.setEnabled(true);
+		chkHdMode.setEnabled(true);
+		
+		chkMute.setSelected(false);
+		chkHdMode.setSelected(true);
+	}
+	
 	public void onPause() {
 		btnPause.setEnabled(false);
 		btnResume.setEnabled(true);

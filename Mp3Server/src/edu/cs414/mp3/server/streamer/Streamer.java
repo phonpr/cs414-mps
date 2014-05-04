@@ -4,12 +4,15 @@ import org.gstreamer.Pipeline;
 import org.gstreamer.State;
 
 public class Streamer implements Runnable {
+	
+	private static final int AUDIO_BANDWIDTH	= 8000;
+	private static final int VIDEO_BANDWIDTH_L	= 61988;
+	private static final int VIDEO_BANDWIDTH_S	= 17158;
 
 	protected Pipeline pipe;
 	
 	@Override
 	public void run() {
-
 	}
 	
 	public void tearDown() {
@@ -23,7 +26,6 @@ public class Streamer implements Runnable {
 	public void init(String host){}
 
 	public void onServerResourceChanged(long currentResource) {
-		
 	}
 
 	public void onStop() {
@@ -31,5 +33,20 @@ public class Streamer implements Runnable {
 		pipe.dispose();
 	};
 	
-
+	protected int calcFramerate(int band, int size) {
+		int vidband = 0;
+		if (size == 1)
+			vidband = VIDEO_BANDWIDTH_L;
+		else
+			vidband = VIDEO_BANDWIDTH_S;
+		
+		// (availiable - audio) / video gives frames/sec
+		int framerate = (band - AUDIO_BANDWIDTH) / vidband;
+		if (framerate >= 25)
+			return 25;
+		else if (framerate <= 15)
+			return -1;
+		else
+			return framerate;
+	}
 }

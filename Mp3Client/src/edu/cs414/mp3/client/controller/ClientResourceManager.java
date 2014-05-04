@@ -10,7 +10,7 @@ import edu.cs414.mp3.client.connection.DesktopConnection;
 import edu.cs414.mp3.client.connection.WebcamConnection;
 
 public class ClientResourceManager {
-	private static long currentResource = 0;
+	private static long bandwidthLimit = 0;
 	private static boolean running = false;
 	
 	private static DesktopConnection desktopConnection = null;
@@ -22,11 +22,11 @@ public class ClientResourceManager {
 			boolean changed = false;
 			
 			while (running) {
-				long newResource = Long.parseLong(readFile("resource.txt"));
+				long newLimit = Long.parseLong(readFile("resource.txt"));
 				
-				if (currentResource != newResource) {
-					System.out.println("[ClientResourceManager] resource changed from " + currentResource + " => " + newResource);
-					currentResource = newResource;
+				if (bandwidthLimit != newLimit) {
+					System.out.println("[ClientResourceManager] Bandwidth limit changed from " + bandwidthLimit + " => " + newLimit);
+					bandwidthLimit = newLimit;
 					changed = true;
 				}
 				else {
@@ -34,13 +34,13 @@ public class ClientResourceManager {
 				}
 				
 				if (desktopConnection != null && changed) {
-					System.out.println("[ClientResourceManager] update resource to Desktop Server : " + currentResource);
-					desktopConnection.onClientResourceChanged(currentResource);
+					System.out.println("[ClientResourceManager] Update bandwidth limit to Desktop Server : " + bandwidthLimit);
+					desktopConnection.onClientResourceChanged(bandwidthLimit);
 				}
 				
 				if (webcamConnection != null && changed) {
-					System.out.println("[ClientResourceManager] update resource to Webcam Server : " + currentResource);
-					webcamConnection.onClientResourceChanged(currentResource);
+					System.out.println("[ClientResourceManager] Update bandwidth limit to Webcam Server : " + bandwidthLimit);
+					webcamConnection.onClientResourceChanged(bandwidthLimit);
 				}
 				
 				try {

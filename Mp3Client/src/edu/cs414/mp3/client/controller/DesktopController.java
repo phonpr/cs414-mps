@@ -209,10 +209,10 @@ public class DesktopController implements Controller, Runnable {
 			return;
 		}
 		else {
-			desktopButtonGroup.onPlay();
+			desktopButtonGroup.onPlay(true);
 			ClientResourceManager.setDesktopConnection(desktopConnection);
 		}
-		passive = true;
+		passive = false;
 		
 		buildPipeline();
 		

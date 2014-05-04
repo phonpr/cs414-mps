@@ -9,7 +9,8 @@ import java.io.InputStreamReader;
 import edu.cs414.mp3.server.streamer.Streamer;
 
 public class ServerResourceManager {
-	private static long currentResource = 0;
+	private static long currentBandwidth = 0;
+	private static long bandwidthLimit = 0;
 	private static boolean running = false;
 	
 	private static Streamer streamer = null;
@@ -22,9 +23,9 @@ public class ServerResourceManager {
 			while (running) {
 				long newResource = Long.parseLong(readFile("resource.txt"));
 				
-				if (currentResource != newResource) {
-					System.out.println("[ServerResourceManager] resource changed from " + currentResource + " => " + newResource);
-					currentResource = newResource;
+				if (bandwidthLimit != newResource) {
+					System.out.println("[ServerResourceManager] Bandwidth limit changed from " + bandwidthLimit + " => " + newResource);
+					bandwidthLimit = newResource;
 					changed = true;
 				}
 				else {
@@ -32,8 +33,8 @@ public class ServerResourceManager {
 				}
 				
 				if (streamer != null && changed) {
-					System.out.println("[ServerResourceManager] update resource to Streamer : " + currentResource);
-					streamer.onServerResourceChanged(currentResource);
+					System.out.println("[ServerResourceManager] Update bandwidth limit to Streamer : " + bandwidthLimit);
+					streamer.onServerResourceChanged(bandwidthLimit);
 				}
 				
 				try {
@@ -52,6 +53,33 @@ public class ServerResourceManager {
 		resourceRunnable = new ServerResourceManager().new ResourceManagerThread();
 		running = true;
 		new Thread(resourceRunnable).start();
+	}
+	
+	public static boolean addBandwidth(int bandwidth) {
+		if (currentBandwidth + bandwidth <= bandwidthLimit) {
+			currentBandwidth += bandwidth;
+			System.out.println("[ServerResourceManager] Current bandwidth : " + currentBandwidth + " / " + bandwidthLimit);
+			return true;
+		}
+		else {
+			System.out.println("[ServerResourceManager] Not enough server resource.");
+			return false;
+		}
+	}
+	
+	public static void subtractBandwidth(int bandwidth) {
+		if (currentBandwidth - bandwidth >= 0) {
+			currentBandwidth -= bandwidth;
+		}
+		System.out.println("[ServerResourceManager] Current bandwidth : " + currentBandwidth + " / " + bandwidthLimit);
+	}
+	
+	public static boolean isBandwidthAvailable(int bandwidth) {
+		return currentBandwidth + bandwidth <= bandwidthLimit;
+	}
+	
+	public static long getBandwidthLimit() {
+		return bandwidthLimit;
 	}
 	
 	public static void setStreamer(Streamer streamer) {

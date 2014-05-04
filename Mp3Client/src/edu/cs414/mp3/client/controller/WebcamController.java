@@ -36,9 +36,7 @@ public class WebcamController implements Controller, Runnable {
 	long lastVideoBuffer = 0;
 	long totalJitter = 0;
 
-	@Override
 	public void buildPipeline() {
-
 		/*
 		failure rate:
 		jitter:
@@ -54,7 +52,7 @@ public class WebcamController implements Controller, Runnable {
 		}
 		else {
 			webcamButtonGroup.onPlay();
-			ResourceManager.setWebcamConnection(webcamConnection);
+			ClientResourceManager.setWebcamConnection(webcamConnection);
 		}
 		videoPipeline = new Pipeline("VideoTest");
 		
@@ -80,11 +78,10 @@ public class WebcamController implements Controller, Runnable {
 
 		final Element videoMonitorTee = ElementFactory.make("tee", "videoMonitorTee");
 		final Element videoMonitorQ = ElementFactory.make("queue", "videoMonitorQ");
-		final Element videoMonitorQ2 = ElementFactory.make("queue", "videoMonitorQ2");
 		final Element audioMonitorTee = ElementFactory.make("tee", "audioMonitorTee");
 		final Element audioMonitorQ = ElementFactory.make("queue", "audioMonitorQ");
 
-		/*
+
 		final AppSink videoApp = (AppSink) ElementFactory.make("appsink", "videodatasink");
 		videoApp.set ("emit-signals", true);
 		videoApp.setSync(false);
@@ -98,51 +95,29 @@ public class WebcamController implements Controller, Runnable {
 				if(time - lastBandwidthTime > 1000) {
 					lastBandwidthTime = time;
 					//display the bandwidth
-					videoWindow.updateBandwidth(bandwidthSinceLast);
+					videoWindow.updateBandwidth(bandwidthSinceLast / 1000);
 					bandwidthSinceLast = 0;
 				}
 				else {
 					bandwidthSinceLast += size;
 				}
 
+				videoWindow.updateJitter((int) (time - lastVideoBuffer));
+
 				totalVideoBuffersSeen++;
-				totalJitter = time - lastVideoBuffer;
+				totalJitter += time - lastVideoBuffer;
 				lastVideoBuffer = time;
 
-				videoWindow.updateJitter((int) (totalJitter / totalVideoBuffersSeen));
-				videoWindow.updateSkew((int)(lastVideoBuffer - lastAudioBuffer));
+				if(!passive)
+					videoWindow.updateSkew((int)(lastVideoBuffer - lastAudioBuffer));
 			}
 		});
 
-		final AppSink audioApp = (AppSink) ElementFactory.make("appsink", "audiodatasink");
-		audioApp.set ("emit-signals", true);
-		audioApp.setSync(false);
-		audioApp.connect(new AppSink.NEW_BUFFER (){
-			@Override
-			public void newBuffer(AppSink arg0) {
-				System.out.println("THERE IS A NEW BUFFER");
-				Buffer temp = arg0.getLastBuffer();
-				long time = temp.getTimestamp().toMillis();
-				int size = temp.getSize();
-
-				if(time - lastBandwidthTime > 1000) {
-					lastBandwidthTime = time;
-					//display the bandwidth
-				}
-				else {
-					bandwidthSinceLast += size;
-				}
-
-				totalAudioBufferSeen++;
-				lastAudioBuffer = time;
-			}
-		});
-		*/
 		RTPBin rtp = new RTPBin("rtp");
 
 		videoPipeline.add(rtp);
 		videoPipeline.addMany(vidUDPSrc, vidRTCPSink, vidRTCPSrc, vidrtpdepay, viddecode, colorspace, vidQ, videoElement);
-		//videoPipeline.addMany(videoMonitorTee, videoMonitorQ, audioMonitorTee, audioMonitorQ, audioApp, videoApp);
+		videoPipeline.addMany(videoMonitorTee, videoMonitorQ, videoApp);
 
 		rtp.connect(new Element.PAD_ADDED() {
 			public void padAdded(Element element, Pad pad) {
@@ -158,10 +133,10 @@ public class WebcamController implements Controller, Runnable {
 			}
 		});
 
-		vidrtpdepay.link(viddecode, /*videoMonitorTee,*/ vidQ, colorspace, videoElement);
+		vidrtpdepay.link(viddecode, videoMonitorTee, vidQ, colorspace, videoElement);
 
-		//videoMonitorTee.link(videoMonitorQ);
-		//videoMonitorQ.link(videoApp);
+		videoMonitorTee.link(videoMonitorQ);
+		videoMonitorQ.link(videoApp);
 
 		vidUDPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtp_sink_0"));
 		vidRTCPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtcp_sink_0"));
@@ -187,12 +162,39 @@ public class WebcamController implements Controller, Runnable {
 			audRTCPSrc.set("port", ConnectionConfig.DESKTOP_AUDIO_RTCP_SRC + 1000);
 			audRTCPSink.set("host", ConnectionConfig.DESKTOP_SERVER_HOST);
 			audRTCPSink.set("port", ConnectionConfig.DESKTOP_AUDIO_RTCP_SINK + 1000);
-			
-			videoPipeline.addMany(audUDPSrc, audRTCPSink, audRTCPSrc, audDec, audrtpdepay, audConvert, audResample, muter, audSink, audQ);
 
-			audrtpdepay.link(/*audioMonitorTee,*/ audQ, audDec, audConvert, audResample, muter, audSink);
-			//audioMonitorTee.link(audioMonitorQ);
-			//audioMonitorQ.link(audioApp);
+			final AppSink audioApp = (AppSink) ElementFactory.make("appsink", "audiodatasink");
+			audioApp.set ("emit-signals", true);
+			audioApp.setSync(false);
+			audioApp.connect(new AppSink.NEW_BUFFER (){
+				@Override
+				public void newBuffer(AppSink arg0) {
+					Buffer temp = arg0.getLastBuffer();
+					long time = temp.getTimestamp().toMillis();
+					int size = temp.getSize();
+
+					if(time - lastBandwidthTime > 1000) {
+						lastBandwidthTime = time;
+						//display the bandwidth
+						videoWindow.updateBandwidth(bandwidthSinceLast / 1000);
+						bandwidthSinceLast = 0;
+					}
+					else {
+						bandwidthSinceLast += size;
+					}
+
+					totalAudioBufferSeen++;
+					lastAudioBuffer = time;
+				}
+			});
+
+			videoPipeline.addMany(audUDPSrc, audRTCPSink, audRTCPSrc, audDec, audrtpdepay, audConvert, audResample, muter, audSink, audQ);
+			videoPipeline.addMany(audioMonitorTee, audioMonitorQ, audioApp);
+
+
+			audrtpdepay.link(audioMonitorTee, audQ, audDec, audConvert, audResample, muter, audSink);
+			audioMonitorTee.link(audioMonitorQ);
+			audioMonitorQ.link(audioApp);
 
 			audUDPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtp_sink_1"));
 			audRTCPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtcp_sink_1"));
@@ -207,6 +209,9 @@ public class WebcamController implements Controller, Runnable {
 		videoPipeline.setState(State.NULL);
 		videoPipeline.remove(videoWindow.getVideoComponent().getElement());
 		videoPipeline.dispose();
+
+		lastBandwidthTime = 0;
+
 		videoPipeline = null;
 	}
 
@@ -281,7 +286,7 @@ public class WebcamController implements Controller, Runnable {
 		System.out.println("[WebcamController] onMute()");
 
 		if (webcamConnection.isHdMode()) {
-			if((boolean) muter.get("mute")) {
+			if((Boolean) muter.get("mute")) {
 				muter.set("mute", false);
 			} else {
 				muter.set("mute", true);
@@ -292,7 +297,9 @@ public class WebcamController implements Controller, Runnable {
 	@Override
 	public void onToggleHdMode() {
 		System.out.println("[DesktopController] onToggleHdMode()");
-		
+
+		System.out.println(webcamConnection.isHdMode());
+
 		if (webcamConnection.isHdMode()) {
 			if (webcamConnection.onSdMode()) {
 				tearDown();

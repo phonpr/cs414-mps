@@ -14,6 +14,8 @@ public class WebcamController implements Controller, Runnable {
 	private Pipeline videoPipeline;
 	private VideoWindow videoWindow;
 	private WebcamConnection webcamConnection;
+
+	private Element muter;
 	
 	public WebcamController(ButtonGroup webcamButtonGroup) {
 		this.webcamButtonGroup = webcamButtonGroup;
@@ -68,13 +70,15 @@ public class WebcamController implements Controller, Runnable {
 		audRTCPSink.set("host", "localhost");
 		audRTCPSink.set("port", 5007);
 
+		muter = ElementFactory.make("volume", "mutecontrol");
+
 		final Element videoElement = videoWindow.getVideoComponent().getElement();
 
 		RTPBin rtp = new RTPBin("rtp");
 
-		videoPipeline.addMany(vidUDPSrc, vidRTCPSink, vidRTCPSrc, audUDPSrc, audRTCPSink, audRTCPSrc, rtp, audDec, vidrtpdepay, viddecode, colorspace, vidQ, videoElement, audrtpdepay, audConvert, audResample, audSink, audQ);
+		videoPipeline.addMany(vidUDPSrc, vidRTCPSink, vidRTCPSrc, audUDPSrc, audRTCPSink, audRTCPSrc, rtp, audDec, vidrtpdepay, viddecode, colorspace, vidQ, videoElement, audrtpdepay, audConvert, audResample, audSink, audQ, muter);
 		vidrtpdepay.link(viddecode, vidQ, colorspace, videoElement);
-		audrtpdepay.link(audQ, audDec, audConvert, audResample, audSink);
+		audrtpdepay.link(audQ, audDec, audConvert, audResample, muter, audSink);
 
 		rtp.connect(new Element.PAD_ADDED() {
 			public void padAdded(Element element, Pad pad) {
@@ -156,8 +160,12 @@ public class WebcamController implements Controller, Runnable {
 	@Override
 	public void onMute() {
 		System.out.println("[WebcamController] onMute()");
-		
-		// mute is controlled under client side
+
+		if((Boolean) muter.get("mute")) {
+			muter.set("mute", false);
+		} else {
+			muter.set("mute", true);
+		}
 	}
 
 	@Override

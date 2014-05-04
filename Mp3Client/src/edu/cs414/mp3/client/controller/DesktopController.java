@@ -21,6 +21,7 @@ public class DesktopController implements Controller, Runnable {
 
 	//All these things are for the session monitoring
 	long totalVideoBuffersSeen = 0;
+	int totalVideoBuffersSince = 0;
 	long totalAudioBufferSeen = 0;
 	long lastBandwidthTime = 0;
 	int bandwidthSinceLast = 0;
@@ -76,9 +77,13 @@ public class DesktopController implements Controller, Runnable {
 					//display the bandwidth
 					videoWindow.updateBandwidth(bandwidthSinceLast / 1000);
 					bandwidthSinceLast = 0;
+
+					videoWindow.updateFramerate(totalVideoBuffersSince);
+					totalVideoBuffersSince = 0;
 				}
 				else {
 					bandwidthSinceLast += size;
+					totalVideoBuffersSince++;
 				}
 
 				videoWindow.updateJitter((int) (time - lastVideoBuffer));
@@ -159,6 +164,9 @@ public class DesktopController implements Controller, Runnable {
 						//display the bandwidth
 						videoWindow.updateBandwidth(bandwidthSinceLast / 1000);
 						bandwidthSinceLast = 0;
+
+						videoWindow.updateFramerate(totalVideoBuffersSince);
+						totalVideoBuffersSince = 0;
 					}
 					else {
 						bandwidthSinceLast += size;
@@ -166,6 +174,7 @@ public class DesktopController implements Controller, Runnable {
 
 					totalAudioBufferSeen++;
 					lastAudioBuffer = time;
+
 				}
 			});
 			

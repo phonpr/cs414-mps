@@ -21,24 +21,14 @@ public class DesktopController implements Controller, Runnable {
 	private VideoWindow videoWindow;
 	private DesktopConnection desktopConnection;
 	private Element muter;
+	private boolean passive;
 	
 	public DesktopController(ButtonGroup desktopButtonGroup) {
 		this.desktopButtonGroup = desktopButtonGroup;
 	}
-
-	@Override
-	public void run() {
-		// connect to server and start playing
-		desktopConnection = new DesktopConnection();
-		if (!desktopConnection.onPlay()) {
-			return;
-		}
-		else {
-			desktopButtonGroup.onPlay();
-		}
-		
+	
+	public void buildPipeline() {
 		videoPipeline = new Pipeline("VideoTest");
-		boolean passive = false;
 		
 		final Element vidrtpdepay = ElementFactory.make("rtpjpegdepay", "viddepay");
 		final Element audrtpdepay = ElementFactory.make("rtppcmadepay", "auddepay");;
@@ -114,7 +104,21 @@ public class DesktopController implements Controller, Runnable {
 
 			audRTCPSink.set("sync", false); audRTCPSink.set("async", false);
 		}
+	}
 
+	@Override
+	public void run() {
+		// connect to server and start playing
+		desktopConnection = new DesktopConnection();
+		if (!desktopConnection.onPlay()) {
+			return;
+		}
+		else {
+			desktopButtonGroup.onPlay();
+		}
+
+		buildPipeline();
+		
 		videoPipeline.setState(State.READY);
 		videoPipeline.setState(State.PLAYING);
 		videoWindow.setVisible(true);
@@ -126,6 +130,8 @@ public class DesktopController implements Controller, Runnable {
 		
 		videoWindow = new VideoWindow();
 		videoWindow.initializeComponents();
+		
+		passive = true;
 		
 		// this will start connection to the server, and play right away
 		new Thread(this).start();

@@ -15,5 +15,4 @@ public class ConnectionConfig {
 	public static final int DESKTOP_AUDIO_UDP_SINK	= 5002;
 	public static final int DESKTOP_AUDIO_RTCP_SRC	= 5007;
 	public static final int DESKTOP_AUDIO_RTCP_SINK	= 5003;
-	
 }

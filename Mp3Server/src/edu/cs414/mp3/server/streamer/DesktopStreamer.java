@@ -18,8 +18,8 @@ public class DesktopStreamer extends Streamer {
 	
 	public void init(String hostname) {
 		hostAddress = hostname;
-		isActiveMode = 0;
-		framerate = 10;
+		isActiveMode = 1;
+		framerate = 20;
 	}
 	
 	@Override
@@ -27,7 +27,7 @@ public class DesktopStreamer extends Streamer {
 		
 		Element videoSrc = ElementFactory.make("ximagesrc", "vidsrc");
 		
-		if (isActiveMode == 1) {
+		if (isActiveMode != 1) {
 			videoSrc.set("endx", 319);
 			videoSrc.set("endy", 239);	
 		} else {
@@ -46,7 +46,7 @@ public class DesktopStreamer extends Streamer {
 		Element vidColor = ElementFactory.make("ffmpegcolorspace", "colorspace");
 		Element vidEnc = ElementFactory.make("jpegenc", "stupidenc");
 		
-		if (isActiveMode == 1) {
+		if (isActiveMode != 1) {
 			vidRate.set("max-rate", 10);
 		} else {
 			vidRate.set("max-rate", framerate);
@@ -78,7 +78,7 @@ public class DesktopStreamer extends Streamer {
 
 		vidRTCPSink.set("sync", false); vidRTCPSink.set("async", false);
 
-		if (isActiveMode != 1) {
+		if (isActiveMode == 1) {
 
 			Element audioSrc = ElementFactory.make("alsasrc", "soundsrc");
 

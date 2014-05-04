@@ -160,4 +160,21 @@ public class WebcamController implements Controller, Runnable {
 		// mute is controlled under client side
 	}
 
+	@Override
+	public void onToggleHdMode() {
+		System.out.println("[DesktopController] onToggleHdMode()");
+		
+		if (webcamConnection.isHdMode()) {
+			if (webcamConnection.onSdMode()) {
+				
+			}
+		}
+		else {
+			// currently SD mode
+			if (webcamConnection.onHdMode()) {
+				
+			}
+		}
+	}
+
 }

@@ -10,6 +10,7 @@ public class ButtonGroup {
 	private JButton btnResume;
 	private JButton btnStop;
 	private JCheckBox chkMute;
+	private JCheckBox chkHdMode;
 	
 	public JButton getBtnPlay() {
 		return btnPlay;
@@ -46,12 +47,20 @@ public class ButtonGroup {
 		this.chkMute = chkMute;
 	}
 	
+	public void setChkHdMode(JCheckBox chkHdMode) {
+		this.chkHdMode = chkHdMode;
+	}
+	
 	public void onPlay() {
 		btnPlay.setEnabled(false);
 		btnPause.setEnabled(true);
 		btnResume.setEnabled(false);
 		btnStop.setEnabled(true);
 		chkMute.setEnabled(true);
+		chkHdMode.setEnabled(true);
+		
+		chkMute.setSelected(false);
+		chkHdMode.setSelected(false);
 	}
 	
 	public void onPause() {
@@ -70,5 +79,9 @@ public class ButtonGroup {
 		btnResume.setEnabled(false);
 		btnStop.setEnabled(false);
 		chkMute.setEnabled(false);
+		chkHdMode.setEnabled(false);
+		
+		chkMute.setSelected(false);
+		chkHdMode.setSelected(false);
 	}
 }

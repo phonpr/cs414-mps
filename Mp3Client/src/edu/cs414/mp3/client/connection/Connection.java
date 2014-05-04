@@ -15,6 +15,8 @@ public abstract class Connection {
 	private PrintWriter writer;
 	private BufferedReader reader;
 	
+	private boolean isHdMode = false;
+	
 	public boolean onPlay(String hostName, int port) {
 		
 		try {
@@ -55,6 +57,24 @@ public abstract class Connection {
 		return success;
 	}
 	
+	public boolean onSdMode() {
+		if (sendCommand(ConnectionProtocol.CMD_SD_MODE)) {
+			isHdMode = false;
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean onHdMode() {
+		if (sendCommand(ConnectionProtocol.CMD_HD_MODE)) {
+			isHdMode = true;
+			return true;
+		}
+		
+		return false;
+	}
+	
 	public boolean sendCommand(String command) {
 		if (socket == null || writer == null || reader == null) {
 			return false;
@@ -76,5 +96,9 @@ public abstract class Connection {
 		}
 		
 		return success;
+	}
+	
+	public boolean isHdMode() {
+		return isHdMode;
 	}
 }

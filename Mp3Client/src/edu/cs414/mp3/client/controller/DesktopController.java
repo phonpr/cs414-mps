@@ -176,4 +176,21 @@ public class DesktopController implements Controller, Runnable {
 		}
 	}
 
+	@Override
+	public void onToggleHdMode() {
+		System.out.println("[DesktopController] onToggleHdMode()");
+		
+		if (desktopConnection.isHdMode()) {
+			if (desktopConnection.onSdMode()) {
+				
+			}
+		}
+		else {
+			// currently SD mode
+			if (desktopConnection.onHdMode()) {
+				
+			}
+		}
+	}
+
 }

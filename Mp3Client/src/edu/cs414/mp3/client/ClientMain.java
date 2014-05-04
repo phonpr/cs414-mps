@@ -41,6 +41,8 @@ public class ClientMain {
 	
 	private ButtonGroup desktopButtonGroup;
 	private DesktopController desktopController;
+	private JCheckBox chckbxWebcamHd;
+	private JCheckBox chckbxDesktopHd;
 
 	/**
 	 * Launch the application.
@@ -74,7 +76,7 @@ public class ClientMain {
 	private void initialize() {
 		frmMpClient = new JFrame();
 		frmMpClient.setTitle("Mp3 Client");
-		frmMpClient.setBounds(100, 100, 491, 81);
+		frmMpClient.setBounds(100, 100, 600, 80);
 		frmMpClient.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		panel = new JPanel();
@@ -123,6 +125,22 @@ public class ClientMain {
 		});
 		
 		chckbxWebcamMute = new JCheckBox("Mute");
+		chckbxWebcamMute.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (webcamController != null) {
+					webcamController.onMute();
+				}
+			}
+		});
+		
+		chckbxWebcamHd = new JCheckBox("HD");
+		chckbxWebcamHd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (webcamController != null) {
+					webcamController.onToggleHdMode();
+				}
+			}
+		});
 		
 		panelWebcam.add(lblWebcamServer);
 		panelWebcam.add(btnWebcamPlay);
@@ -130,6 +148,7 @@ public class ClientMain {
 		panelWebcam.add(btnWebcamResume);
 		panelWebcam.add(btnWebcamStop);
 		panelWebcam.add(chckbxWebcamMute);
+		panelWebcam.add(chckbxWebcamHd);
 		
 		JPanel panelDesktop = new JPanel();
 		panel.add(panelDesktop);
@@ -180,6 +199,15 @@ public class ClientMain {
 				}
 			}
 		});
+		
+		chckbxDesktopHd = new JCheckBox("HD");
+		chckbxDesktopHd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (desktopController != null) {
+					desktopController.onToggleHdMode();
+				}
+			}
+		});
 
 		panelDesktop.add(lblDesktopServer);
 		panelDesktop.add(btnDesktopPlay);
@@ -187,6 +215,7 @@ public class ClientMain {
 		panelDesktop.add(btnDesktopResume);
 		panelDesktop.add(btnDesktopStop);
 		panelDesktop.add(chckbxDesktopMute);
+		panelDesktop.add(chckbxDesktopHd);
 	}
 	
 	public void initializeButtonGroups() {
@@ -196,6 +225,7 @@ public class ClientMain {
 		webcamButtonGroup.setBtnResume(btnWebcamResume);
 		webcamButtonGroup.setBtnStop(btnWebcamStop);
 		webcamButtonGroup.setChkMute(chckbxWebcamMute);
+		webcamButtonGroup.setChkHdMode(chckbxWebcamHd);
 		
 		desktopButtonGroup = new ButtonGroup();
 		desktopButtonGroup.setBtnPlay(btnDesktopPlay);
@@ -203,6 +233,7 @@ public class ClientMain {
 		desktopButtonGroup.setBtnResume(btnDesktopResume);
 		desktopButtonGroup.setBtnStop(btnDesktopStop);
 		desktopButtonGroup.setChkMute(chckbxDesktopMute);
+		desktopButtonGroup.setChkHdMode(chckbxDesktopHd);
 		
 		webcamButtonGroup.onReset();
 		desktopButtonGroup.onReset();

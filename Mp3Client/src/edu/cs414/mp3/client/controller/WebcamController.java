@@ -45,15 +45,6 @@ public class WebcamController implements Controller, Runnable {
 		bandwidth:
 		 */
 
-		// connect to server and start playing
-		webcamConnection = new WebcamConnection();
-		if (!webcamConnection.onPlay()) {
-			return;
-		}
-		else {
-			webcamButtonGroup.onPlay();
-			ClientResourceManager.setWebcamConnection(webcamConnection);
-		}
 		videoPipeline = new Pipeline("VideoTest");
 		
 		final Element vidrtpdepay = ElementFactory.make("rtpjpegdepay", "viddepay");

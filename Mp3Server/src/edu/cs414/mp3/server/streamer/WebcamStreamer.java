@@ -10,7 +10,7 @@ public class WebcamStreamer extends Streamer {
 		int isActiveMode = 0;
 		int framerate = 10;
 
-		createPipeline(framerate, isActiveMode);
+		createPipeline(isActiveMode, framerate);
 
 		play();
 	}

@@ -137,7 +137,7 @@ public class ClientMain {
 		chckbxWebcamHd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (webcamController != null) {
-					webcamController.onHdMode();
+					webcamController.onToggleHdMode();
 				}
 			}
 		});

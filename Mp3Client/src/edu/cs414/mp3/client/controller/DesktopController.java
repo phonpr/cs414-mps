@@ -185,7 +185,7 @@ public class DesktopController implements Controller, Runnable {
 	public void onMute() {
 		System.out.println("[DesktopController] onMute()");
 		
-		if((boolean) muter.get("mute")) {
+		if((Boolean) muter.get("mute")) {
 			muter.set("mute", false);
 		} else {
 			muter.set("mute", true);

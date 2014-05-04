@@ -2,11 +2,13 @@ package edu.cs414.mp3.client.controller;
 
 import edu.cs414.mp3.common.ConnectionConfig;
 
+import edu.cs414.mp3.common.resource.ResourceManager;
 import org.gstreamer.*;
 
 import edu.cs414.mp3.client.ButtonGroup;
 import edu.cs414.mp3.client.VideoWindow;
 import edu.cs414.mp3.client.connection.WebcamConnection;
+import org.gstreamer.elements.AppSink;
 
 import org.gstreamer.elements.good.RTPBin;
 
@@ -24,8 +26,36 @@ public class WebcamController implements Controller, Runnable {
 	public WebcamController(ButtonGroup webcamButtonGroup) {
 		this.webcamButtonGroup = webcamButtonGroup;
 	}
-	
+
+	//All these things are for the session monitoring
+	long totalVideoBuffersSeen = 0;
+	long totalAudioBufferSeen = 0;
+	long lastBandwidthTime = 0;
+	int bandwidthSinceLast = 0;
+	long lastAudioBuffer = 0;
+	long lastVideoBuffer = 0;
+	long totalJitter = 0;
+
+	@Override
 	public void buildPipeline() {
+
+		/*
+		failure rate:
+		jitter:
+		frame rate:
+		synchronization skew:
+		bandwidth:
+		 */
+
+		// connect to server and start playing
+		webcamConnection = new WebcamConnection();
+		if (!webcamConnection.onPlay()) {
+			return;
+		}
+		else {
+			webcamButtonGroup.onPlay();
+			ResourceManager.setWebcamConnection(webcamConnection);
+		}
 		videoPipeline = new Pipeline("VideoTest");
 		
 		final Element vidrtpdepay = ElementFactory.make("rtpjpegdepay", "viddepay");
@@ -43,17 +73,77 @@ public class WebcamController implements Controller, Runnable {
 		vidUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)JPEG, ssrc=(uint)2934514725, payload=(int)96, clock-base=(uint)2718573098, seqnum-base=(uint)11320"));
 		vidUDPSrc.set("port", ConnectionConfig.DESKTOP_VIDEO_UDP_SINK + 1000);
 		vidRTCPSrc.set("port", ConnectionConfig.DESKTOP_VIDEO_RTCP_SRC + 1000);
-		vidRTCPSink.set("host", ConnectionConfig.DESKTOP_SERVER_HOST + 1000);
+		vidRTCPSink.set("host", ConnectionConfig.DESKTOP_SERVER_HOST);
 		vidRTCPSink.set("port", ConnectionConfig.DESKTOP_VIDEO_RTCP_SINK + 1000);
 
 		final Element videoElement = videoWindow.getVideoComponent().getElement();
 
+		final Element videoMonitorTee = ElementFactory.make("tee", "videoMonitorTee");
+		final Element videoMonitorQ = ElementFactory.make("queue", "videoMonitorQ");
+		final Element videoMonitorQ2 = ElementFactory.make("queue", "videoMonitorQ2");
+		final Element audioMonitorTee = ElementFactory.make("tee", "audioMonitorTee");
+		final Element audioMonitorQ = ElementFactory.make("queue", "audioMonitorQ");
+
+		/*
+		final AppSink videoApp = (AppSink) ElementFactory.make("appsink", "videodatasink");
+		videoApp.set ("emit-signals", true);
+		videoApp.setSync(false);
+		videoApp.connect(new AppSink.NEW_BUFFER (){
+			@Override
+			public void newBuffer(AppSink arg0) {
+				Buffer temp = arg0.getLastBuffer();
+				long time = temp.getTimestamp().toMillis();
+				int size = temp.getSize();
+
+				if(time - lastBandwidthTime > 1000) {
+					lastBandwidthTime = time;
+					//display the bandwidth
+					videoWindow.updateBandwidth(bandwidthSinceLast);
+					bandwidthSinceLast = 0;
+				}
+				else {
+					bandwidthSinceLast += size;
+				}
+
+				totalVideoBuffersSeen++;
+				totalJitter = time - lastVideoBuffer;
+				lastVideoBuffer = time;
+
+				videoWindow.updateJitter((int) (totalJitter / totalVideoBuffersSeen));
+				videoWindow.updateSkew((int)(lastVideoBuffer - lastAudioBuffer));
+			}
+		});
+
+		final AppSink audioApp = (AppSink) ElementFactory.make("appsink", "audiodatasink");
+		audioApp.set ("emit-signals", true);
+		audioApp.setSync(false);
+		audioApp.connect(new AppSink.NEW_BUFFER (){
+			@Override
+			public void newBuffer(AppSink arg0) {
+				System.out.println("THERE IS A NEW BUFFER");
+				Buffer temp = arg0.getLastBuffer();
+				long time = temp.getTimestamp().toMillis();
+				int size = temp.getSize();
+
+				if(time - lastBandwidthTime > 1000) {
+					lastBandwidthTime = time;
+					//display the bandwidth
+				}
+				else {
+					bandwidthSinceLast += size;
+				}
+
+				totalAudioBufferSeen++;
+				lastAudioBuffer = time;
+			}
+		});
+		*/
 		RTPBin rtp = new RTPBin("rtp");
 
 		videoPipeline.add(rtp);
 		videoPipeline.addMany(vidUDPSrc, vidRTCPSink, vidRTCPSrc, vidrtpdepay, viddecode, colorspace, vidQ, videoElement);
-		vidrtpdepay.link(viddecode, vidQ, colorspace, videoElement);
-		
+		//videoPipeline.addMany(videoMonitorTee, videoMonitorQ, audioMonitorTee, audioMonitorQ, audioApp, videoApp);
+
 		rtp.connect(new Element.PAD_ADDED() {
 			public void padAdded(Element element, Pad pad) {
 				System.out.println("pad added");
@@ -67,6 +157,11 @@ public class WebcamController implements Controller, Runnable {
 				}
 			}
 		});
+
+		vidrtpdepay.link(viddecode, /*videoMonitorTee,*/ vidQ, colorspace, videoElement);
+
+		//videoMonitorTee.link(videoMonitorQ);
+		//videoMonitorQ.link(videoApp);
 
 		vidUDPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtp_sink_0"));
 		vidRTCPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtcp_sink_0"));
@@ -94,8 +189,11 @@ public class WebcamController implements Controller, Runnable {
 			audRTCPSink.set("port", ConnectionConfig.DESKTOP_AUDIO_RTCP_SINK + 1000);
 			
 			videoPipeline.addMany(audUDPSrc, audRTCPSink, audRTCPSrc, audDec, audrtpdepay, audConvert, audResample, muter, audSink, audQ);
-			audrtpdepay.link(audQ, audDec, audConvert, audResample, muter, audSink);
-			
+
+			audrtpdepay.link(/*audioMonitorTee,*/ audQ, audDec, audConvert, audResample, muter, audSink);
+			//audioMonitorTee.link(audioMonitorQ);
+			//audioMonitorQ.link(audioApp);
+
 			audUDPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtp_sink_1"));
 			audRTCPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtcp_sink_1"));
 			rtp.getRequestPad("send_rtcp_src_1").link(audRTCPSink.getStaticPad("sink"));

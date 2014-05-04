@@ -29,11 +29,13 @@ public class VideoWindow extends JFrame {
 	private JPanel panelVideo = null;
 	private JPanel panelMonitor = null;
 	private VideoComponent videoComponent = null;
-//	private JTextField textCompressionTime = null;
-	private JTextField textDecompressionTime = null;
-	private JTextField textCompressionRatio = null;
-	private JTextField textCompressedSize = null;
-	
+	private JTextField textSkew = null;
+	private JTextField textJitter = null;
+	private JTextField textBandwidth = null;
+	private JTextField textFramerate = null;
+
+
+
 	public VideoWindow() {
 	}
 	
@@ -55,33 +57,36 @@ public class VideoWindow extends JFrame {
 		panelVideo.setLayout(new BorderLayout());
 		panelVideo.add(videoComponent, BorderLayout.CENTER);
 		
-		textDecompressionTime = new JTextField();
-		textDecompressionTime.setColumns(6);
-		textDecompressionTime.setEditable(false);
-		panelMonitor.add(new JLabel("Decompression Time :"));
-		panelMonitor.add(textDecompressionTime);
-		
-		// common
-		textCompressionRatio = new JTextField();
-		textCompressionRatio.setColumns(6);
-		textCompressionRatio.setEditable(false);
-		textCompressedSize = new JTextField();
-		textCompressedSize.setColumns(6);
-		textCompressedSize.setEditable(false);
-		
-		panelMonitor.add(new JLabel("Compression Ratio :"));
-		panelMonitor.add(textCompressionRatio);
-		panelMonitor.add(new JLabel("Compressed Size :"));
-		panelMonitor.add(textCompressedSize);
+		textSkew = new JTextField();
+		textSkew.setColumns(6);
+		textSkew.setEditable(false);
+		textJitter = new JTextField();
+		textJitter.setColumns(6);
+		textJitter.setEditable(false);
+		textBandwidth = new JTextField();
+		textBandwidth.setColumns(6);
+		textBandwidth.setEditable(false);
+		textFramerate = new JTextField();
+		textFramerate.setColumns(6);
+		textFramerate.setEditable(false);
+
+		panelMonitor.add(new JLabel("Skew :"));
+		panelMonitor.add(textSkew);
+		panelMonitor.add(new JLabel("Jitter :"));
+		panelMonitor.add(textJitter);
+		panelMonitor.add(new JLabel("Bandwidth :"));
+		panelMonitor.add(textBandwidth);
+		panelMonitor.add(new JLabel("Framerate :"));
+		panelMonitor.add(textFramerate);
 		
 		updateSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
  		videoComponent.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
  		
  		// set initial compression monitor information to 0
- 		updateCompressionTime(0);
- 		updateDecompressionTime(0);
- 		updateCompressionRatio(0);
- 		updateCompressedSize(0);
+ 		updateSkew(0);
+ 		updateJitter(0);
+ 		updateBandwidth(0);
+ 		updateFramerate(0);
 	}
 	
 	public void updateSize(int width, int height) {
@@ -92,16 +97,20 @@ public class VideoWindow extends JFrame {
  		setBounds(frameX, frameY, width, height);
 	}
 	
-	public void updateCompressionTime(int time) {
+	public void updateSkew(int skew) {
+		textSkew.setText("" + skew);
 	}
 	
-	public void updateDecompressionTime(int time) {
+	public void updateJitter(int jitter) {
+		textJitter.setText("" + jitter);
 	}
 	
-	public void updateCompressionRatio(double ratio) {
+	public void updateBandwidth(int bandwidth) {
+		textBandwidth.setText("" + bandwidth);
 	}
 	
-	public void updateCompressedSize(int size) {
+	public void updateFramerate(int framerate) {
+		textFramerate.setText("" + framerate);
 	}
 	
 	public VideoComponent getVideoComponent() {

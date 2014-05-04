@@ -2,7 +2,6 @@ package edu.cs414.mp3.client.controller;
 
 import edu.cs414.mp3.common.ConnectionConfig;
 
-import edu.cs414.mp3.common.resource.ResourceManager;
 import org.gstreamer.*;
 
 import edu.cs414.mp3.client.ButtonGroup;

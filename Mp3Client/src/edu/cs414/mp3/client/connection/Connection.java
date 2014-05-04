@@ -75,6 +75,12 @@ public abstract class Connection {
 		return false;
 	}
 	
+	public void onClientResourceChanged(long currentResource) {
+		if (sendCommand(ConnectionProtocol.CMD_RESOURCE_CHANGED + currentResource)) {
+			// not doing anything
+		}
+	}
+	
 	public boolean sendCommand(String command) {
 		if (socket == null || writer == null || reader == null) {
 			return false;

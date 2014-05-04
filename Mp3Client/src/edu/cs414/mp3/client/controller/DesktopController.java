@@ -35,6 +35,7 @@ public class DesktopController implements Controller, Runnable {
 		}
 		else {
 			desktopButtonGroup.onPlay();
+			ResourceManager.setDesktopConnection(desktopConnection);
 		}
 		
 		videoPipeline = new Pipeline("VideoTest");
@@ -142,6 +143,8 @@ public class DesktopController implements Controller, Runnable {
 		
 		if (desktopConnection.onStop()) {
 			videoPipeline.setState(State.NULL);
+			
+			ResourceManager.setDesktopConnection(null);
 		}
 	}
 

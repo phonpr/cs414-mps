@@ -5,6 +5,7 @@ import org.gstreamer.*;
 import edu.cs414.mp3.client.ButtonGroup;
 import edu.cs414.mp3.client.VideoWindow;
 import edu.cs414.mp3.client.connection.WebcamConnection;
+
 import org.gstreamer.elements.good.RTPBin;
 
 public class WebcamController implements Controller, Runnable {
@@ -30,6 +31,7 @@ public class WebcamController implements Controller, Runnable {
 		}
 		else {
 			webcamButtonGroup.onPlay();
+			ResourceManager.setWebcamConnection(webcamConnection);
 		}
 
 		videoWindow.setVisible(true);
@@ -130,6 +132,7 @@ public class WebcamController implements Controller, Runnable {
 		
 		if (webcamConnection.onStop()) {
 			videoPipeline.setState(State.NULL);
+			ResourceManager.setWebcamConnection(null);
 		}
 	}
 

@@ -59,7 +59,7 @@ public class ClientMain {
 		ConnectionConfig.setWebcamServerHost(args[0]);
 		
 		System.out.println("[ClientMain] Setting Desktop Server : " + args[1]);
-		ConnectionConfig.setWebcamServerHost(args[1]);
+		ConnectionConfig.setDesktopServerHost(args[1]);
 		
 		Gst.init();
 		

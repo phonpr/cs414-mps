@@ -13,18 +13,13 @@ import edu.cs414.mp3.common.ConnectionConfig;
 
 public class DesktopStreamer extends Streamer {
 	private String hostAddress;
-	private int isActiveMode;
-	private int framerate;
 	
 	public void init(String hostname) {
 		hostAddress = hostname;
-		isActiveMode = 1;
-		framerate = 20;
 	}
 	
-	@Override
-	public void run() {
-		
+	public void buildPipeline(int isActiveMode, int framerate) {
+		pipe = new Pipeline();
 		Element videoSrc = ElementFactory.make("ximagesrc", "vidsrc");
 		
 		if (isActiveMode != 1) {
@@ -64,7 +59,6 @@ public class DesktopStreamer extends Streamer {
 		vidRTCPSrc.set("port", ConnectionConfig.DESKTOP_VIDEO_RTCP_SRC);
 		vidRTCPSink.set("host", hostAddress);
 		vidRTCPSink.set("port", ConnectionConfig.DESKTOP_VIDEO_RTCP_SINK);
-		Pipeline pipe = new Pipeline();
 
 		pipe.add(rtp);
 		pipe.addMany(videoSrc, vidColor, videofilter1, videofilter2, vidRate, vidEnc, vidQ, vidrtppay, vidUDPSink, vidRTCPSink, vidRTCPSrc);
@@ -111,6 +105,11 @@ public class DesktopStreamer extends Streamer {
 		}
 		
 		System.out.println(rtp.getPads());
+	}
+	
+	@Override
+	public void run() {
+		buildPipeline(0, 10);
 		
 		pipe.setState(State.READY);
 		pipe.setState(State.PLAYING);
@@ -120,6 +119,13 @@ public class DesktopStreamer extends Streamer {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void setNewPipeline(int active, int frames) {
+		buildPipeline(active, frames);
+		
+		pipe.setState(State.READY);
+		pipe.setState(State.PLAYING);
 	}
 
 }

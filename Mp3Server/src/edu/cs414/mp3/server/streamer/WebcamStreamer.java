@@ -19,7 +19,6 @@ public class WebcamStreamer extends Streamer {
 		hostAddress = host;
 	}
 
-	private Pipeline pipe = new Pipeline();
 	private String hostAddress;
 
 	public void createPipeline(int framerate, int isActiveMode) {
@@ -41,6 +40,8 @@ public class WebcamStreamer extends Streamer {
 		bandwidth:
 		 */
 
+		pipe = new Pipeline();
+		
 		isActiveMode = 1;
 
 		/* All of this stuff is from the RecordController from MP1 */

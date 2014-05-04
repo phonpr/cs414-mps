@@ -15,7 +15,7 @@ public abstract class ConnectionControl implements Runnable {
 	private PrintWriter writer;
 	private BufferedReader reader;
 	
-	private Streamer streamer;
+	protected Streamer streamer;
 	
 	private boolean connectionControlRunning = false;
 	

@@ -105,6 +105,14 @@ public class DesktopController implements Controller, Runnable {
 			audRTCPSink.set("sync", false); audRTCPSink.set("async", false);
 		}
 	}
+	
+	public void tearDown() {
+		videoPipeline.setState(State.READY);
+		videoPipeline.setState(State.NULL);
+		videoPipeline.remove(videoWindow.getVideoComponent().getElement());
+		videoPipeline.dispose();
+		videoPipeline = null;
+	}
 
 	@Override
 	public void run() {
@@ -190,13 +198,23 @@ public class DesktopController implements Controller, Runnable {
 		
 		if (desktopConnection.isHdMode()) {
 			if (desktopConnection.onSdMode()) {
+				tearDown();
+				passive = false;
+				buildPipeline();
 				
+				videoPipeline.setState(State.READY);
+				videoPipeline.setState(State.PLAYING);
 			}
 		}
 		else {
 			// currently SD mode
 			if (desktopConnection.onHdMode()) {
+				tearDown();
+				passive = true;
+				buildPipeline();
 				
+				videoPipeline.setState(State.READY);
+				videoPipeline.setState(State.PLAYING);
 			}
 		}
 	}

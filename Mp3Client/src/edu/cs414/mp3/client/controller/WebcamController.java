@@ -1,6 +1,7 @@
 package edu.cs414.mp3.client.controller;
 
 import edu.cs414.mp3.common.ConnectionConfig;
+
 import org.gstreamer.*;
 
 import edu.cs414.mp3.client.ButtonGroup;
@@ -18,31 +19,20 @@ public class WebcamController implements Controller, Runnable {
 	private WebcamConnection webcamConnection;
 
 	private Element muter;
+	private boolean passive;
 	
 	public WebcamController(ButtonGroup webcamButtonGroup) {
 		this.webcamButtonGroup = webcamButtonGroup;
 	}
-
-	@Override
-	public void run() {
-		// connect to server and start playing
-		webcamConnection = new WebcamConnection();
-		if (!webcamConnection.onPlay()) {
-			return;
-		}
-		else {
-			webcamButtonGroup.onPlay();
-			ResourceManager.setWebcamConnection(webcamConnection);
-		}
-
+	
+	public void buildPipeline() {
 		videoPipeline = new Pipeline("VideoTest");
-		boolean passive = false;
-
+		
 		final Element vidrtpdepay = ElementFactory.make("rtpjpegdepay", "viddepay");
 		final Element audrtpdepay = ElementFactory.make("rtppcmadepay", "auddepay");;
 
 		Element vidQ = ElementFactory.make("queue", "vidQ");
-
+		
 		Element viddecode = ElementFactory.make("jpegdec", "viddec");
 		Element colorspace = ElementFactory.make("ffmpegcolorspace", "colorspace");
 
@@ -63,7 +53,7 @@ public class WebcamController implements Controller, Runnable {
 		videoPipeline.add(rtp);
 		videoPipeline.addMany(vidUDPSrc, vidRTCPSink, vidRTCPSrc, vidrtpdepay, viddecode, colorspace, vidQ, videoElement);
 		vidrtpdepay.link(viddecode, vidQ, colorspace, videoElement);
-
+		
 		rtp.connect(new Element.PAD_ADDED() {
 			public void padAdded(Element element, Pad pad) {
 				System.out.println("pad added");
@@ -81,38 +71,61 @@ public class WebcamController implements Controller, Runnable {
 		vidUDPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtp_sink_0"));
 		vidRTCPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtcp_sink_0"));
 		rtp.getRequestPad("send_rtcp_src_0").link(vidRTCPSink.getStaticPad("sink"));
-
+		
 		vidRTCPSink.set("sync", false); vidRTCPSink.set("async", false);
 
 		if (!passive) {
 			Element audQ = ElementFactory.make("queue", "audQ");
-
+			
 			Element audDec = ElementFactory.make("alawdec", "auddec");
 			Element audConvert = ElementFactory.make("audioconvert", "audconvert");
 			Element audResample = ElementFactory.make("audioresample", "audresample");
 			muter = ElementFactory.make("volume", "mutecontrol");
 			Element audSink = ElementFactory.make("autoaudiosink", "audsink");
-
+			
 			Element audUDPSrc = ElementFactory.make("udpsrc", "audUDPsrc");
 			Element audRTCPSink = ElementFactory.make("udpsink", "audRTCPsink");
 			Element audRTCPSrc = ElementFactory.make("udpsrc", "audRTCPsrc");
 
 			audUDPSrc.setCaps(Caps.fromString("application/x-rtp, media=(string)audio, clock-rate=(int)8000, encoding-name=(string)PCMA, ssrc=(uint)3824386182, payload=(int)8, clock-base=(uint)921092443, seqnum-base=(uint)8008"));
-			audUDPSrc.set("port", ConnectionConfig.DESKTOP_AUDIO_UDP_SINK);
-			audRTCPSrc.set("port", ConnectionConfig.DESKTOP_AUDIO_RTCP_SRC);
-			audRTCPSink.set("host", ConnectionConfig.DESKTOP_SERVER_HOST);
-			audRTCPSink.set("port", ConnectionConfig.DESKTOP_AUDIO_RTCP_SINK);
-
+			audUDPSrc.set("port", ConnectionConfig.DESKTOP_AUDIO_UDP_SINK + 1000);
+			audRTCPSrc.set("port", ConnectionConfig.DESKTOP_AUDIO_RTCP_SRC + 1000);
+			audRTCPSink.set("host", ConnectionConfig.DESKTOP_SERVER_HOST + 1000);
+			audRTCPSink.set("port", ConnectionConfig.DESKTOP_AUDIO_RTCP_SINK + 1000);
+			
 			videoPipeline.addMany(audUDPSrc, audRTCPSink, audRTCPSrc, audDec, audrtpdepay, audConvert, audResample, muter, audSink, audQ);
 			audrtpdepay.link(audQ, audDec, audConvert, audResample, muter, audSink);
-
+			
 			audUDPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtp_sink_1"));
 			audRTCPSrc.getStaticPad("src").link(rtp.getRequestPad("recv_rtcp_sink_1"));
 			rtp.getRequestPad("send_rtcp_src_1").link(audRTCPSink.getStaticPad("sink"));
 
 			audRTCPSink.set("sync", false); audRTCPSink.set("async", false);
 		}
+	}
+	
+	public void tearDown() {
+		videoPipeline.setState(State.READY);
+		videoPipeline.setState(State.NULL);
+		videoPipeline.remove(videoWindow.getVideoComponent().getElement());
+		videoPipeline.dispose();
+		videoPipeline = null;
+	}
 
+	@Override
+	public void run() {
+		// connect to server and start playing
+		webcamConnection = new WebcamConnection();
+		if (!webcamConnection.onPlay()) {
+			return;
+		}
+		else {
+			webcamButtonGroup.onPlay();
+		}
+
+		passive = true;
+		buildPipeline();
+		
 		videoPipeline.setState(State.READY);
 		videoPipeline.setState(State.PLAYING);
 		videoWindow.setVisible(true);
@@ -181,13 +194,23 @@ public class WebcamController implements Controller, Runnable {
 		
 		if (webcamConnection.isHdMode()) {
 			if (webcamConnection.onSdMode()) {
+				tearDown();
+				passive = true;
+				buildPipeline();
 				
+				videoPipeline.setState(State.READY);
+				videoPipeline.setState(State.PLAYING);
 			}
 		}
 		else {
 			// currently SD mode
 			if (webcamConnection.onHdMode()) {
+				tearDown();
+				passive = false;
+				buildPipeline();
 				
+				videoPipeline.setState(State.READY);
+				videoPipeline.setState(State.PLAYING);
 			}
 		}
 	}
